@@ -1,0 +1,31 @@
+{
+  "name": "@open-hearth/tsconfig",
+  "description": "A set of frequently used tsconfig.json for various typescript applications",
+  "keywords": [
+    "hearth",
+    "abdullah6223",
+    "tsconfig",
+    "react",
+    "next"
+  ],
+  "version": "0.0.0-development",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdullah6223/hearth-platform.git",
+    "directory": "packages/tsconfig"
+  },
+  "author": {
+    "name": "Abdullah",
+    "email": "abdullah.dev921@gmail.com",
+    "url": "https://github.com/abdullah6223"
+  },
+  "license": "MIT",
+  "files": [
+    "base.json",
+    "react-lib.json",
+    "next-app.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
