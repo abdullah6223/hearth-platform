@@ -1,0 +1,13 @@
+{
+  "name": "@open-hearth/locales",
+  "version": "1.0.0",
+  "dependencies": {
+    "@open-hearth/config": "workspace:^",
+    "lodash": "catalog:",
+    "next-cookies": "^2.0.3"
+  },
+  "exports": {
+    "./*": "./*.js"
+  },
+  "repository": "https://github.com/abdullah6223/hearth-platform/tree/main/packages/locales"
+}
