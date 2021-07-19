@@ -1,0 +1,9 @@
+{
+    "name": "@open-hearth/config",
+    "main": "index.js",
+    "version": "1.0.0",
+    "dependencies": {
+        "dotenv": "^16.4.7"
+    },
+    "repository": "https://github.com/abdullah6223/hearth-platform/tree/main/packages/config"
+}
