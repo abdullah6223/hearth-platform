@@ -1,0 +1,40 @@
+{
+  "name": "@open-hearth/codegen",
+  "main": "index.js",
+  "version": "1.0.0",
+  "repository": "https://github.com/abdullah6223/hearth-platform/tree/main/packages/codegen",
+  "dependencies": {
+    "@apollo/client": "catalog:",
+    "@faker-js/faker": "catalog:",
+    "@graphql-typed-document-node/core": "^3.1.1",
+    "@open-hearth/config": "workspace:^",
+    "@open-hearth/keystone": "workspace:^",
+    "@open-hearth/miniapp-utils": "workspace:^",
+    "@open-hearth/next": "workspace:^",
+    "boxen": "^4.2.0",
+    "chalk": "4.1.2",
+    "dayjs": "catalog:",
+    "graphql": "catalog:",
+    "graphql-tag": "catalog:",
+    "lodash": "catalog:",
+    "ncp": "^2.0.0",
+    "nunjucks": "^3.2.4",
+    "pluralize": "catalog:",
+    "yargs": "^16.2.0"
+  },
+  "eslintConfig": {
+    "ignorePatterns": [
+      "templates/**/*"
+    ]
+  },
+  "peerDependencies": {
+    "@graphql-tools/graphql-file-loader": "^7.5.17",
+    "@graphql-tools/load": "^8.1.0",
+    "react": ">=16",
+    "react-dom": ">=16"
+  },
+  "devDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  }
+}
