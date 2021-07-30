@@ -1,0 +1,76 @@
+@import "antd/lib/dropdown/style/index.less";
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import "../style/mixins/typography";
+
+.hearth-dropdown {
+  .hearth-typography-h5();
+
+  .hearth-dropdown-menu {
+    max-height: min(100vh, 360px);
+    padding: @hearth-global-spacing-4 0;
+    overflow: auto;
+    border-radius: @hearth-global-border-radius-medium;
+    box-shadow: @hearth-global-box-shadow-default;
+
+    .hearth-dropdown-menu-item {
+      padding: @hearth-global-spacing-8 @hearth-global-spacing-16;
+    }
+  }
+}
+
+.hearth-dropdown.hearth-dropdown-wrapper {
+  .hearth-dropdown-menu {
+    .hearth-dropdown-menu-item-divider {
+      margin: 0;
+    }
+
+    .hearth-dropdown-menu-item {
+      padding: @hearth-global-spacing-20;
+
+      &:hover {
+        background-color: @hearth-global-color-white;
+      }
+
+      .hearth-dropdown-item-icon {
+        position: relative;
+        top: 1px;
+        display: inline-flex;
+      }
+
+      .hearth-typography {
+        /* stylelint-disable-next-line value-no-vendor-prefix */
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        -moz-box-orient: vertical;
+        transition: color @hearth-global-transition-duration-default ease-out;
+      }
+
+      &.hearth-dropdown-menu-item-disabled {
+        color: @hearth-global-color-gray-7;
+
+        .hearth-typography {
+          color: @hearth-global-color-gray-7;
+        }
+      }
+
+      &:not(.hearth-dropdown-menu-item-disabled):hover {
+        color: @hearth-global-color-green-5;
+
+        .hearth-typography {
+          color: @hearth-global-color-green-5;
+        }
+      }
+
+      &:not(.hearth-dropdown-menu-item-disabled):active {
+        color: @hearth-global-color-green-7;
+
+        .hearth-typography {
+          color: @hearth-global-color-green-7;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,61 @@
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+
+.hearth-dropdown-trigger.hearth-btn-extended {
+  padding: 0;
+  cursor: default;
+
+  .hearth-btn-ellipsis {
+    z-index: 1;
+    display: inline-flex;
+    padding: @hearth-global-spacing-12 @hearth-global-spacing-20 @hearth-global-spacing-12 0;
+  }
+
+  .hearth-btn-label {
+    max-width: calc(100% - @hearth-global-spacing-20 - @hearth-global-spacing-20);
+    margin-right: auto;
+    margin-left: auto;
+    padding: @hearth-global-spacing-12 0 @hearth-global-spacing-12 @hearth-global-spacing-20;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hearth-btn-text {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hearth-btn-vertical-divider {
+    width: 1px;
+    height: 100%;
+    margin-right: @hearth-global-spacing-16;
+    margin-left: @hearth-global-spacing-20;
+    background-color: @hearth-global-color-white;
+    opacity: 0.1;
+  }
+
+  &.hearth-btn-secondary > .hearth-btn-text {
+    .hearth-btn-vertical-divider {
+      background-color: @hearth-global-color-black;
+    }
+  }
+
+  &.hearth-btn-secondary.hearth-btn-dangerous > .hearth-btn-text {
+    .hearth-btn-vertical-divider {
+      background-color: @hearth-global-color-red-5;
+    }
+  }
+
+  &.hearth-btn-secondary:not(.hearth-btn-dangerous):hover > .hearth-btn-text {
+    .hearth-btn-vertical-divider {
+      background: @hearth-global-color-brand-gradient-5 border-box;
+    }
+  }
+
+  &:hover.hearth-btn-secondary.hearth-btn-dangerous > .hearth-btn-text {
+    .hearth-btn-vertical-divider {
+      background-color: @hearth-global-color-red-7;
+    }
+  }
+}
