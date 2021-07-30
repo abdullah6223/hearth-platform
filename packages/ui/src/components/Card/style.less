@@ -1,0 +1,155 @@
+@import "antd/lib/card/style/index.less";
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+
+@hearth-card-active-outline-indent: 0;
+@hearth-card-focus-outline-border-width: @hearth-global-border-width-default * 2;
+@hearth-card-focus-outline-indent: -(@hearth-global-border-width-default + @hearth-card-focus-outline-border-width + 1);
+
+.hearth-card {
+  height: inherit;
+  border: @hearth-global-border-width-default solid @hearth-global-color-gray-3;
+  border-radius: @hearth-global-border-radius-large;
+
+  &-disabled {
+    opacity: 0.5;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  &-head {
+    min-height: 0;
+    overflow: hidden;
+    border-bottom: @hearth-global-border-width-default solid @hearth-global-color-gray-3;
+    border-radius: @hearth-global-border-radius-large @hearth-global-border-radius-large 0 0;
+  }
+
+  &-body {
+    overflow: hidden;
+
+    &:not(:first-child) {
+      border-top: 0;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+  }
+
+  &-hoverable {
+    transition-duration: @hearth-global-transition-duration-default;
+    transition-property: box-shadow;
+
+    .hearth-card-head {
+      transition-duration: @hearth-global-transition-duration-default, @hearth-global-transition-duration-default;
+      transition-property: border-color, background-color;
+    }
+
+    .hearth-card-body {
+      transition-duration: @hearth-global-transition-duration-default;
+      transition-property: border-color;
+    }
+  }
+
+  &-head-title {
+    padding: 0;
+    overflow: visible;
+  }
+
+  &-active {
+    box-shadow: @hearth-global-box-shadow-active;
+
+    // Used for gradient outline on active card
+    &::before {
+      position: absolute;
+      top: @hearth-card-active-outline-indent;
+      right: @hearth-card-active-outline-indent;
+      bottom: @hearth-card-active-outline-indent;
+      left: @hearth-card-active-outline-indent;
+      display: block;
+      box-sizing: border-box;
+      background: @hearth-global-color-brand-gradient-5 border-box;
+      border: @hearth-global-border-width-default solid transparent;
+      border-radius: inherit;
+      content: "";
+      mask: linear-gradient(#111 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+  }
+
+  &-accent:not(&-checkbox-type) {
+    background-color: @hearth-global-color-black;
+
+    & .hearth-card-head {
+      border-color: @hearth-global-color-gray-7;
+
+      & * {
+        color: @hearth-global-color-white;
+      }
+    }
+
+    & .hearth-card-body {
+      border-color: @hearth-global-color-gray-7;
+
+      & * {
+        color: @hearth-global-color-gray-3;
+      }
+    }
+  }
+
+  // Used for gradient outline on focus
+  &::after {
+    position: absolute;
+    top: @hearth-card-focus-outline-indent;
+    right: @hearth-card-focus-outline-indent;
+    bottom: @hearth-card-focus-outline-indent;
+    left: @hearth-card-focus-outline-indent;
+    display: none;
+    box-sizing: border-box;
+    background: @hearth-global-color-brand-gradient-5 border-box;
+    border: @hearth-card-focus-outline-border-width solid transparent;
+    border-radius: inherit;
+    content: "";
+    mask: linear-gradient(#111 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+
+    &::after {
+      display: block;
+    }
+  }
+
+  &-hoverable:hover {
+    box-shadow: @hearth-global-box-shadow-default;
+  }
+
+  &-hoverable&-active:hover {
+    box-shadow: @hearth-global-box-shadow-active;
+  }
+
+  &-hoverable:not(.hearth-card-accent, .hearth-card-no-body):hover {
+    .hearth-card-head {
+      background-color: @hearth-global-color-gray-1;
+      border-color: @hearth-global-color-gray-5;
+    }
+
+    .hearth-card-body {
+      border-color: @hearth-global-color-gray-5;
+    }
+  }
+
+  &:active {
+    box-shadow: none;
+  }
+
+  & .hearth-card-link-content {
+    display: inline-flex;
+    flex-flow: row;
+    gap: @hearth-global-spacing-8;
+    align-items: center;
+    text-decoration: underline;
+  }
+}

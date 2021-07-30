@@ -1,0 +1,51 @@
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/core/breakpoints.less";
+
+@hearth-card-head-big-image-size: 64px;
+@hearth-card-head-small-image-size: 24px;
+
+.hearth-card {
+  .hearth-card-head {
+    @media @from-mobile-small and @to-tablet-small {
+      & {
+        padding: @hearth-global-spacing-16;
+      }
+    }
+
+    @media @from-tablet-large {
+      & {
+        padding: @hearth-global-spacing-24;
+      }
+    }
+  }
+
+  &-no-body .hearth-card-head {
+    border-radius: @hearth-global-spacing-12;
+
+    .hearth-card-head-title {
+      display: flex;
+    }
+  }
+
+  &-header-tag {
+    position: absolute;
+    top: @hearth-global-spacing-8;
+    right: @hearth-global-spacing-8;
+  }
+
+  & .hearth-card-header-content {
+    white-space: break-spaces;
+
+    &-image {
+      &-size-big {
+        width: @hearth-card-head-big-image-size;
+        height: @hearth-card-head-big-image-size;
+      }
+
+      &-size-small {
+        width: @hearth-card-head-small-image-size;
+        height: @hearth-card-head-small-image-size;
+      }
+    }
+  }
+}

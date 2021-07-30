@@ -1,0 +1,41 @@
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/core/breakpoints.less";
+
+.hearth-card {
+  .hearth-card-body {
+    @media @from-mobile-small and @to-tablet-small {
+      & {
+        padding: @hearth-global-spacing-16;
+      }
+    }
+
+    @media @from-tablet-large {
+      & {
+        padding: @hearth-global-spacing-24;
+      }
+    }
+  }
+
+  &-no-body .hearth-card-body {
+    display: none;
+  }
+
+  .hearth-card-body-content {
+    width: 100%;
+    white-space: break-spaces;
+
+    &-image-container {
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      justify-content: center;
+      width: 100%;
+      background-color: @hearth-global-color-gray-1;
+      border-radius: @hearth-global-spacing-12;
+    }
+
+    & .hearth-btn {
+      width: 100%;
+    }
+  }
+}

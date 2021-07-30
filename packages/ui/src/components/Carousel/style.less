@@ -1,0 +1,94 @@
+@import "antd/lib/carousel/style/index.less";
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/_utils/controls/style.less";
+
+@carousel-dot-width: 8px;
+@carousel-dot-height: 8px;
+@carousel-dot-active-width: 8px;
+@hearth-carousel-slide-gap: @hearth-global-spacing-40;
+
+.hearth-carousel {
+  & .slick-dots {
+    li {
+      box-sizing: border-box;
+      margin: 0 @hearth-global-spacing-4;
+
+      & button {
+        background: transparent;
+        border: @hearth-global-border-width-default solid @hearth-global-color-black;
+        border-radius: @hearth-global-border-radius-small;
+        opacity: @hearth-global-opacity-disabled;
+      }
+
+      &.slick-active button {
+        background-color: @hearth-global-color-black;
+      }
+    }
+
+    &-bottom {
+      bottom: @hearth-global-spacing-12;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  & .slick-arrow {
+    &.hearth-control-large {
+      margin-top: (-@hearth-control-lg-size / 2);
+    }
+
+    &.hearth-control-small {
+      margin-top: (-@hearth-control-sm-size / 2);
+    }
+
+    &,
+    &:hover {
+      position: absolute;
+      top: 50%;
+      z-index: 1;
+    }
+
+    &.slick-next.hearth-control-large {
+      right: (-@hearth-control-lg-size / 2);
+    }
+
+    &.slick-next.hearth-control-small {
+      right: (-@hearth-control-sm-size / 2);
+    }
+
+    &.slick-prev.hearth-control-large {
+      left: (-@hearth-control-lg-size / 2);
+    }
+
+    &.slick-prev.hearth-control-small {
+      left: (-@hearth-control-sm-size / 2);
+    }
+
+    &.slick-disabled {
+      display: none !important;
+    }
+  }
+
+  & .slick-slide > div {
+    margin: 0 (@hearth-carousel-slide-gap / 2);
+  }
+
+  & .slick-list {
+    margin: 0 (-@hearth-carousel-slide-gap / 2);
+    padding: 0;
+
+    // NOTE: Force all slides to have same width
+    & > .slick-track {
+      display: flex;
+
+      & > .slick-slide {
+        height: inherit;
+
+        & > div,
+        & > div > section {
+          height: 100%;
+        }
+      }
+    }
+  }
+}

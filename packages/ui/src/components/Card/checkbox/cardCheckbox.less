@@ -1,0 +1,58 @@
+@import (reference) "@open-hearth/ui/src/components/Card/style.less";
+
+@hearth-card-checkbox-active-outline-indent: 0;
+@hearth-card-checkbox-checkbox-padding: @hearth-global-spacing-12;
+
+.hearth-card {
+  &-checkbox-type {
+    cursor: pointer;
+
+    & .hearth-card-checkbox {
+      position: absolute;
+      top: @hearth-card-checkbox-checkbox-padding;
+      right: @hearth-card-checkbox-checkbox-padding;
+      pointer-events: none;
+    }
+  }
+
+  &-checked&-checkbox-type {
+    & .hearth-card-head {
+      background: @hearth-global-color-brand-gradient-1;
+      border-color: transparent;
+
+      & * {
+        color: @hearth-global-color-green-5;
+      }
+    }
+
+    & .hearth-card-body {
+      border-color: transparent;
+    }
+
+    &:hover {
+      box-shadow: @hearth-global-box-shadow-active;
+    }
+
+    // Used for gradient outline on checked checkbox card
+    &::before {
+      position: absolute;
+      top: @hearth-card-checkbox-active-outline-indent;
+      right: @hearth-card-checkbox-active-outline-indent;
+      bottom: @hearth-card-checkbox-active-outline-indent;
+      left: @hearth-card-checkbox-active-outline-indent;
+      display: block;
+      box-sizing: border-box;
+      background: @hearth-global-color-brand-gradient-5 border-box;
+      border: @hearth-global-border-width-default solid transparent;
+      border-radius: inherit;
+      content: "";
+      mask: linear-gradient(#111 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    &:active {
+      box-shadow: none;
+    }
+  }
+}
