@@ -1,0 +1,125 @@
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/button";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/transition";
+
+@hearth-icon-button-focus-outline-width: @hearth-global-border-width-default * 4;
+@hearth-icon-button-focus-visible-outline-width: @hearth-global-border-width-default * 2;
+@hearth-icon-button-focus-outline-border-radius-small: @hearth-global-border-radius-medium;
+@hearth-icon-button-focus-outline-border-radius-medium: @hearth-global-border-radius-large;
+@hearth-icon-button-border-radius-small: @hearth-global-border-radius-small;
+@hearth-icon-button-border-radius-medium: @hearth-global-border-radius-medium;
+@hearth-icon-button-padding-small: 2px;
+@hearth-icon-button-padding-medium: 8px;
+
+.hearth-icon-btn {
+  width: auto;
+  min-width: inherit;
+  height: auto;
+  padding: @hearth-icon-button-padding-medium;
+  background-color: transparent;
+  border: none;
+  border-radius: @hearth-icon-button-border-radius-medium;
+  .hearth-transition(background;);
+
+  span {
+    position: relative;
+    z-index: 1;
+  }
+
+  &::after {
+    // We reset style for ::after element to remove wave effect
+    all: unset;
+  }
+
+  // After layer is used to show gradient outline on tab-focusing
+  &:focus-visible::after {
+    box-sizing: border-box;
+    background: @hearth-global-color-brand-gradient-5 border-box;
+    border: @hearth-icon-button-focus-visible-outline-width solid transparent;
+    opacity: 1;
+    mask: linear-gradient(#111 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  &::before {
+    .hearth-btn-layer(0px);
+
+    background: @hearth-global-color-brand-gradient-1;
+    opacity: 0;
+    .hearth-transition(opacity;);
+  }
+
+  .hearth-icon-btn-content {
+    display: inline-flex;
+    color: @hearth-global-color-black;
+    .hearth-transition(color;);
+
+    svg {
+      color: @hearth-global-color-black;
+      fill: currentcolor;
+      .hearth-transition(color;);
+    }
+  }
+
+  &:focus::after {
+    .hearth-btn-layer(-@hearth-icon-button-focus-outline-width);
+
+    border-radius: @hearth-icon-button-focus-outline-border-radius-medium;
+  }
+
+  &:disabled {
+    background-color: transparent;
+
+    .hearth-icon-btn-content {
+      opacity: @hearth-global-opacity-disabled;
+    }
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
+  &:not(:disabled):hover {
+    &::before {
+      opacity: 1;
+    }
+
+    .hearth-icon-btn-content {
+      color: @hearth-global-color-green-5;
+
+      svg {
+        color: @hearth-global-color-green-5;
+      }
+    }
+  }
+
+  &:not(:disabled):active,
+  &:not(:disabled):active:hover {
+    .hearth-icon-btn-content {
+      color: @hearth-global-color-green-7;
+
+      svg {
+        color: @hearth-global-color-green-7;
+      }
+    }
+  }
+
+  &.hearth-icon-btn-small {
+    padding: @hearth-icon-button-padding-small;
+    border-radius: @hearth-icon-button-border-radius-small;
+
+    &:focus::after {
+      border-radius: @hearth-icon-button-focus-outline-border-radius-small;
+    }
+  }
+}
+
+// Overriding antd styles for buttons with href prop
+a.hearth-icon-btn {
+  padding-top: @hearth-icon-button-padding-medium !important;
+
+  &.hearth-icon-btn-small {
+    padding-top: @hearth-icon-button-padding-small !important;
+  }
+}

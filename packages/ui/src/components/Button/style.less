@@ -1,0 +1,827 @@
+@import "antd/lib/button/style/index.less";
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/typography";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/button";
+
+@hearth-button-padding-height-large: @hearth-global-spacing-48;
+@hearth-button-padding-hor-large: @hearth-global-spacing-20;
+@hearth-button-padding-height-medium: @hearth-global-spacing-32;
+@hearth-button-padding-hor-medium: @hearth-global-spacing-12;
+
+@hearth-button-padding-height-large-compact: @hearth-global-spacing-24;
+@hearth-button-padding-height-medium-compact: @hearth-global-spacing-20;
+@hearth-button-padding-hor-compact: @hearth-global-spacing-4;
+
+@hearth-button-border-width: @hearth-global-border-width-default;
+@hearth-button-line-height-large: @hearth-global-typography-h4-line-height;
+@hearth-button-line-height-medium: @hearth-global-typography-h6-line-height;
+
+@hearth-button-focus-outline-width: @hearth-global-border-width-default * 4;
+@hearth-button-border-radius: @hearth-global-border-radius-medium;
+@hearth-button-gap-medium: @hearth-global-spacing-4;
+@hearth-button-gap-large: @hearth-global-spacing-8;
+
+.minimal-styles() {
+  text-shadow: none;
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+
+  &::before {
+    display: none;
+  }
+
+  &::after {
+    opacity: 0;
+  }
+
+  &:focus-visible::after {
+    opacity: 1;
+  }
+}
+
+.hearth-btn {
+  .hearth-typography-h4();
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: none;
+  border-radius: @hearth-button-border-radius;
+  box-shadow: none;
+  transition: none;
+
+  span {
+    position: relative;
+    z-index: 1;
+  }
+
+  &-medium {
+    min-width: @hearth-global-spacing-32;
+    .hearth-typography-h5();
+
+    span + span {
+      margin-left: @hearth-button-gap-medium;
+    }
+  }
+
+  &-large {
+    min-width: @hearth-global-spacing-48;
+    .hearth-typography-h4();
+
+    span + span {
+      margin-left: @hearth-button-gap-large;
+    }
+  }
+
+  &-medium.hearth-btn-primary {
+    .hearth-btn(@hearth-button-line-height-medium, @hearth-button-padding-height-medium,
+    @hearth-button-padding-hor-medium, 0);
+  }
+
+  &-medium.hearth-btn-secondary,
+  &-medium.hearth-btn-accent {
+    .hearth-btn(@hearth-button-line-height-medium, @hearth-button-padding-height-medium,
+    @hearth-button-padding-hor-medium, @hearth-button-border-width);
+  }
+
+  &-large.hearth-btn-primary {
+    .hearth-btn(@hearth-button-line-height-large, @hearth-button-padding-height-large, @hearth-button-padding-hor-large, 0);
+  }
+
+  &-large.hearth-btn-secondary,
+  &-large.hearth-btn-accent {
+    .hearth-btn(@hearth-button-line-height-large, @hearth-button-padding-height-large,
+    @hearth-button-padding-hor-large, @hearth-button-border-width);
+  }
+
+  &-medium.hearth-btn-compact.hearth-btn-primary {
+    min-width: 0;
+    .hearth-btn(@hearth-button-line-height-medium, @hearth-button-padding-height-medium-compact,
+    @hearth-button-padding-hor-compact, 0);
+  }
+
+  &-medium.hearth-btn-compact.hearth-btn-secondary,
+  &-medium.hearth-btn-compact.hearth-btn-accent {
+    min-width: 0;
+    .hearth-btn(@hearth-button-line-height-medium, @hearth-button-padding-height-medium-compact,
+    @hearth-button-padding-hor-compact, @hearth-button-border-width);
+  }
+
+  &-large.hearth-btn-compact.hearth-btn-primary {
+    min-width: 0;
+    .hearth-btn(@hearth-button-line-height-large, @hearth-button-padding-height-large-compact,
+    @hearth-button-padding-hor-compact, 0);
+  }
+
+  &-large.hearth-btn-compact.hearth-btn-secondary,
+  &-large.hearth-btn-compact.hearth-btn-accent {
+    min-width: 0;
+    .hearth-btn(@hearth-button-line-height-large, @hearth-button-padding-height-large-compact,
+    @hearth-button-padding-hor-compact, @hearth-button-border-width);
+  }
+
+  &-medium.hearth-btn-compact.hearth-btn-icon-only {
+    width: @hearth-global-spacing-20;
+    height: @hearth-global-spacing-20;
+  }
+
+  &-large.hearth-btn-compact.hearth-btn-icon-only {
+    width: @hearth-global-spacing-24;
+    height: @hearth-global-spacing-24;
+  }
+
+  &-minimal.hearth-btn-primary,
+  &-minimal.hearth-btn-secondary,
+  &-minimal.hearth-btn-accent,
+  &-minimal.hearth-btn-primary.hearth-btn-stateless:not(:disabled),
+  &-minimal.hearth-btn-secondary.hearth-btn-stateless:not(:disabled),
+  &-minimal.hearth-btn-accent.hearth-btn-stateless:not(:disabled),
+  &-minimal.hearth-btn-primary.hearth-btn-dangerous,
+  &-minimal.hearth-btn-secondary.hearth-btn-dangerous,
+  &-minimal.hearth-btn-accent.hearth-btn-dangerous {
+    .minimal-styles;
+
+    &:hover,
+    &:focus {
+      .minimal-styles;
+    }
+  }
+
+  &-minimal.hearth-btn-primary:not(.hearth-btn-dangerous, .hearth-btn-stateless),
+  &-minimal.hearth-btn-secondary:not(.hearth-btn-dangerous, .hearth-btn-stateless),
+  &-minimal.hearth-btn-accent:not(.hearth-btn-dangerous, .hearth-btn-stateless) {
+    &::before {
+      .hearth-btn-layer(0);
+
+      background: @hearth-global-color-brand-gradient-1;
+      opacity: 0;
+      transition: opacity @hearth-global-transition-duration-default ease-in-out;
+    }
+
+    &:hover:not(:disabled) {
+      .hearth-btn-static-text-color(@hearth-global-color-green-5);
+      .hearth-btn-content-color(@hearth-global-color-green-5);
+    }
+
+    &:active:not(:disabled) {
+      .hearth-btn-static-text-color(@hearth-global-color-green-7);
+      .hearth-btn-content-color(@hearth-global-color-green-7);
+    }
+
+    &:hover:not(:disabled, .hearth-btn-compact)::before {
+      opacity: 1;
+    }
+  }
+
+  &-minimal.hearth-btn-compact.hearth-btn-primary,
+  &-minimal.hearth-btn-compact.hearth-btn-secondary,
+  &-minimal.hearth-btn-compact.hearth-btn-accent,
+  &-minimal.hearth-btn-compact.hearth-btn-primary.hearth-btn-dangerous,
+  &-minimal.hearth-btn-compact.hearth-btn-secondary.hearth-btn-dangerous,
+  &-minimal.hearth-btn-compact.hearth-btn-accent.hearth-btn-dangerous {
+    padding: 0;
+    border: none;
+
+    &:disabled {
+      border: none;
+    }
+  }
+
+  // After layer is used to show gradient outline on tab-focusing
+  &:focus-visible::after,
+  &-focus::after {
+    box-sizing: border-box;
+    background: @hearth-global-color-brand-gradient-5 border-box;
+    border: @hearth-button-focus-outline-width solid transparent;
+    opacity: 1;
+    mask: linear-gradient(#111 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  &-primary:focus::after,
+  &-primary.hearth-btn-focus::after {
+    .hearth-btn-layer(-@hearth-button-focus-outline-width);
+
+    border-radius: @hearth-button-border-radius + @hearth-button-focus-outline-width;
+  }
+
+  &-primary {
+    color: @hearth-global-color-white;
+    background: @hearth-global-color-black;
+    transition-property: background-color;
+
+    & > .hearth-btn-text {
+      color: @hearth-global-color-white;
+      background: transparent;
+    }
+
+    &::before {
+      .hearth-btn-layer(0);
+
+      background: @hearth-global-color-brand-gradient-5;
+      opacity: 0;
+      transition: opacity @hearth-global-transition-duration-default ease-in-out;
+    }
+
+    &:focus,
+    &-focus {
+      background: @hearth-global-color-black;
+    }
+
+    &:hover {
+      background: @hearth-global-color-black;
+
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    &:active {
+      background: @hearth-global-color-black;
+
+      &::before {
+        background: @hearth-global-color-brand-gradient-7;
+      }
+    }
+
+    &.hearth-btn-minimal {
+      .hearth-btn-content-color(@hearth-global-color-black);
+    }
+
+    &.hearth-btn-stateless {
+      &:focus,
+      &:hover,
+      &:active,
+      &-focus {
+        background: @hearth-global-color-black;
+
+        &::before {
+          opacity: 0;
+        }
+      }
+    }
+
+    &.hearth-btn-dangerous {
+      background: @hearth-global-color-red-5;
+      transition: background @hearth-global-transition-duration-default ease-in-out;
+
+      &:focus,
+      &-focus {
+        background: @hearth-global-color-red-5;
+      }
+
+      &:hover {
+        background: @hearth-global-color-red-7;
+      }
+
+      &:active {
+        background: @hearth-global-color-red-5;
+      }
+
+      &.hearth-btn-minimal {
+        .hearth-btn-content-color(@hearth-global-color-red-5);
+        .hearth-btn-static-text-color(@hearth-global-color-red-5);
+
+        &:hover {
+          .hearth-btn-content-color(@hearth-global-color-red-7);
+          .hearth-btn-static-text-color(@hearth-global-color-red-7);
+        }
+
+        &:active {
+          .hearth-btn-content-color(@hearth-global-color-red-5);
+          .hearth-btn-static-text-color(@hearth-global-color-red-5);
+        }
+
+        &:not(:disabled).hearth-btn-stateless {
+          &:focus,
+          &-focus,
+          &:hover,
+          &:active {
+            .hearth-btn-content-color(@hearth-global-color-red-5);
+            .hearth-btn-static-text-color(@hearth-global-color-red-5);
+          }
+        }
+
+        &:disabled {
+          .hearth-btn-content-color(@hearth-global-color-black);
+          .hearth-btn-static-text-color(@hearth-global-color-black);
+        }
+      }
+
+      &.hearth-btn-stateless {
+        &:focus,
+        &-focus,
+        &:hover,
+        &:active {
+          background: @hearth-global-color-red-5;
+        }
+      }
+
+      &::before {
+        opacity: 0;
+      }
+    }
+
+    &:disabled,
+    &:disabled:hover,
+    &:disabled:active,
+    &:disabled:focus,
+    &.hearth-btn-dangerous:disabled,
+    &.hearth-btn-dangerous:disabled:hover,
+    &.hearth-btn-dangerous:disabled:active,
+    &.hearth-btn-dangerous:disabled:focus,
+    &-focus:disabled {
+      color: @hearth-global-color-white;
+      background: @hearth-global-color-black;
+      opacity: @hearth-global-opacity-disabled;
+
+      &.hearth-btn-minimal {
+        .minimal-styles;
+      }
+
+      &::before {
+        opacity: 0;
+      }
+    }
+
+    &.hearth-btn-dangerous.hearth-btn-minimal:hover:not(.hearth-btn-compact, :disabled, .hearth-btn-stateless) {
+      background: @hearth-global-color-red-1;
+    }
+  }
+
+  &-secondary {
+    color: @hearth-global-color-black;
+    border: @hearth-button-border-width solid @hearth-global-color-gray-7;
+    transition: background-color @hearth-global-transition-duration-default ease-in-out;
+    .hearth-btn-content-color(@hearth-global-color-black);
+
+    &::after {
+      .hearth-btn-layer(-@hearth-button-border-width);
+
+      box-sizing: border-box;
+      background: @hearth-global-color-brand-gradient-5 border-box;
+      border: @hearth-button-border-width solid transparent;
+      opacity: 0;
+      transition: opacity @hearth-global-transition-duration-default ease-out;
+      mask: linear-gradient(#111 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    &.hearth-btn-focus::after,
+    &:focus-visible::after {
+      .hearth-btn-layer(-(@hearth-button-focus-outline-width + @hearth-button-border-width));
+
+      border: @hearth-button-focus-outline-width solid transparent;
+      border-radius: @hearth-button-border-radius + @hearth-button-focus-outline-width;
+      opacity: 1;
+    }
+
+    &:focus::after,
+    &-focus::after {
+      background: @hearth-global-color-brand-gradient-5 border-box;
+    }
+
+    &:hover::after {
+      background: @hearth-global-color-brand-gradient-5 border-box;
+      opacity: 1;
+    }
+
+    &:active::after {
+      background: @hearth-global-color-brand-gradient-7 border-box;
+    }
+
+    & > .hearth-btn-text {
+      background: transparent;
+    }
+
+    &,
+    &:focus,
+    &-focus {
+      background: transparent;
+      border: @hearth-button-border-width solid @hearth-global-color-gray-7;
+    }
+
+    &:hover {
+      background: @hearth-global-color-brand-gradient-1;
+      .hearth-btn-content-color(@hearth-global-color-green-5);
+    }
+
+    &:active {
+      background: @hearth-global-color-brand-gradient-1;
+      .hearth-btn-content-color(@hearth-global-color-green-7);
+    }
+
+    &.hearth-btn-dangerous {
+      .hearth-btn-content-color(@hearth-global-color-red-5);
+      .hearth-btn-static-text-color(@hearth-global-color-red-5);
+
+      &::after {
+        opacity: 0;
+      }
+
+      &:focus-visible::after,
+      &.hearth-btn-focus::after {
+        opacity: 1;
+      }
+
+      border: @hearth-button-border-width solid @hearth-global-color-red-5;
+
+      .hearth-btn-minimal {
+        border: none;
+      }
+
+      &:hover {
+        background: @hearth-global-color-red-1;
+        .hearth-btn-content-color(@hearth-global-color-red-7);
+        .hearth-btn-static-text-color(@hearth-global-color-red-7);
+      }
+
+      &:active {
+        background: @hearth-global-color-red-1;
+        .hearth-btn-content-color(@hearth-global-color-red-5);
+        .hearth-btn-static-text-color(@hearth-global-color-red-5);
+      }
+
+      &::before,
+      &:focus::before,
+      &-focus::before {
+        background: @hearth-global-color-red-5 border-box;
+      }
+
+      &:hover::before {
+        background: @hearth-global-color-red-7 border-box;
+      }
+
+      &:active::before {
+        background: @hearth-global-color-red-5 border-box;
+      }
+
+      &.hearth-btn-stateless {
+        &:hover,
+        &:active,
+        &:focus,
+        &-focus {
+          .hearth-btn-content-color(@hearth-global-color-red-5);
+          .hearth-btn-static-text-color(@hearth-global-color-red-5);
+        }
+
+        &::before,
+        &:focus::before,
+        &-focus::before,
+        &:hover::before,
+        &:active::before {
+          background: @hearth-global-color-red-5 border-box;
+        }
+      }
+    }
+
+    &:disabled {
+      background: transparent;
+      border: @hearth-button-border-width solid @hearth-global-color-gray-7;
+      opacity: @hearth-global-opacity-disabled;
+
+      .hearth-btn-content-color(@hearth-global-color-black);
+      .hearth-btn-static-text-color(@hearth-global-color-black);
+
+      &::after {
+        opacity: 0;
+      }
+
+      &.hearth-btn-minimal {
+        .minimal-styles;
+
+        .hearth-btn-content-color(@hearth-global-color-black);
+        .hearth-btn-static-text-color(@hearth-global-color-black);
+      }
+    }
+
+    &.hearth-btn-minimal:not(.hearth-btn-dangerous, :disabled) {
+      .hearth-btn-static-text-color(@hearth-global-color-gray-7);
+      .hearth-btn-content-color(@hearth-global-color-gray-7);
+    }
+
+    &.hearth-btn-stateless:not(:disabled) {
+      &:not(.hearth-btn-dangerous) {
+        .hearth-btn-content-color(@hearth-global-color-black);
+      }
+
+      &.hearth-btn-minimal:not(.hearth-btn-dangerous) {
+        &,
+        &:active,
+        &:hover {
+          .hearth-btn-static-text-color(@hearth-global-color-gray-7);
+          .hearth-btn-content-color(@hearth-global-color-gray-7);
+        }
+      }
+
+      &:hover,
+      &:active {
+        background: transparent;
+      }
+
+      &:not(.hearth-btn-dangerous, .hearth-btn-minimal):hover {
+        border: @hearth-button-border-width solid @hearth-global-color-gray-7;
+      }
+
+      &:hover::after,
+      &:active::after,
+      &:hover::before,
+      &:active::before {
+        opacity: 0;
+      }
+    }
+
+    //&:disabled,
+    &:disabled:hover,
+    &:disabled:active,
+    &:disabled:focus,
+    &.hearth-btn-dangerous:disabled,
+    &.hearth-btn-dangerous:disabled:hover,
+    &.hearth-btn-dangerous:disabled:active,
+    &.hearth-btn-dangerous:disabled:focus,
+    &.hearth-btn-focus:disabled {
+      background: transparent;
+      border: @hearth-button-border-width solid @hearth-global-color-gray-7;
+      opacity: @hearth-global-opacity-disabled;
+
+      .hearth-btn-content-color(@hearth-global-color-black);
+      .hearth-btn-static-text-color(@hearth-global-color-black);
+
+      &::after {
+        opacity: 0;
+      }
+
+      &.hearth-btn-minimal {
+        .minimal-styles;
+
+        .hearth-btn-content-color(@hearth-global-color-black);
+        .hearth-btn-static-text-color(@hearth-global-color-black);
+      }
+    }
+
+    &.hearth-btn-dangerous.hearth-btn-minimal:hover:not(.hearth-btn-compact, :disabled, .hearth-btn-stateless) {
+      background: @hearth-global-color-red-1;
+    }
+  }
+
+  &-accent {
+    .hearth-btn-static-text-color(@hearth-global-color-green-5);
+    .hearth-btn-content-color(@hearth-global-color-green-5);
+
+    & > .hearth-btn-text {
+      background: transparent;
+    }
+
+    &::before {
+      .hearth-btn-layer(-@hearth-button-border-width);
+
+      background: @hearth-global-color-brand-gradient-5;
+      opacity: 0;
+      transition: opacity @hearth-global-transition-duration-default ease-in-out;
+    }
+
+    &,
+    &:focus,
+    &-focus {
+      background: transparent;
+      border-color: transparent;
+    }
+
+    &:hover {
+      .hearth-btn-static-text-color(@hearth-global-color-white);
+      .hearth-btn-content-color(@hearth-global-color-white);
+
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    &:active {
+      .hearth-btn-static-text-color(@hearth-global-color-white);
+      .hearth-btn-content-color(@hearth-global-color-white);
+
+      &::before {
+        background: @hearth-global-color-brand-gradient-7;
+      }
+    }
+
+    &.hearth-btn-minimal {
+      .hearth-btn-static-text-color(@hearth-global-color-green-5);
+      .hearth-btn-content-color(@hearth-global-color-green-5);
+
+      &::before {
+        opacity: 0;
+      }
+
+      &::after {
+        opacity: 0;
+      }
+    }
+
+    &::after {
+      .hearth-btn-layer(-@hearth-button-border-width);
+
+      box-sizing: border-box;
+      background: @hearth-global-color-brand-gradient-5 border-box;
+      border: @hearth-button-border-width solid transparent;
+      opacity: 1;
+      transition: opacity @hearth-global-transition-duration-default ease-out;
+      mask: linear-gradient(#111 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    &.hearth-btn-focus::after,
+    &:focus-visible::after {
+      .hearth-btn-layer(-(@hearth-button-focus-outline-width + @hearth-button-border-width));
+
+      border: @hearth-button-focus-outline-width solid transparent;
+      border-radius: @hearth-button-border-radius + @hearth-button-focus-outline-width;
+      opacity: 1;
+    }
+
+    &.hearth-btn-dangerous {
+      .hearth-btn-content-color(@hearth-global-color-red-5);
+      .hearth-btn-static-text-color(@hearth-global-color-red-5);
+
+      &::before {
+        display: none;
+      }
+
+      &::after {
+        opacity: 0;
+      }
+
+      &:focus-visible::after,
+      &.hearth-btn-focus::after {
+        opacity: 1;
+      }
+
+      border: @hearth-button-border-width solid @hearth-global-color-red-5;
+
+      &:hover {
+        background: @hearth-global-color-red-1;
+        .hearth-btn-content-color(@hearth-global-color-red-7);
+        .hearth-btn-static-text-color(@hearth-global-color-red-7);
+      }
+
+      &:active {
+        background: @hearth-global-color-red-1;
+        .hearth-btn-content-color(@hearth-global-color-red-5);
+        .hearth-btn-static-text-color(@hearth-global-color-red-5);
+      }
+
+      &::before,
+      &:focus::before,
+      &-focus::before {
+        background: @hearth-global-color-red-5 border-box;
+      }
+
+      &:hover::before {
+        background: @hearth-global-color-red-7 border-box;
+      }
+
+      &:active::before {
+        background: @hearth-global-color-red-5 border-box;
+      }
+
+      &.hearth-btn-stateless {
+        &:hover,
+        &:active,
+        &:focus,
+        &-focus {
+          .hearth-btn-content-color(@hearth-global-color-red-5);
+          .hearth-btn-static-text-color(@hearth-global-color-red-5);
+        }
+
+        &::before,
+        &:focus::before,
+        &-focus::before,
+        &:hover::before,
+        &:active::before {
+          background: @hearth-global-color-red-5 border-box;
+        }
+      }
+    }
+
+    &:disabled {
+      background: transparent;
+      border: @hearth-button-border-width solid @hearth-global-color-gray-7;
+      opacity: @hearth-global-opacity-disabled;
+
+      .hearth-btn-content-color(@hearth-global-color-black);
+      .hearth-btn-static-text-color(@hearth-global-color-black);
+
+      &::after {
+        opacity: 0;
+      }
+
+      &.hearth-btn-minimal {
+        .minimal-styles;
+      }
+    }
+
+    &.hearth-btn-stateless:not(:disabled) {
+      &:not(.hearth-btn-dangerous) {
+        .hearth-btn-content-color(@hearth-global-color-green-5);
+      }
+
+      &:hover,
+      &:active {
+        background: transparent;
+      }
+
+      &:hover::before,
+      &:active::before {
+        opacity: 0;
+      }
+    }
+
+    //&:disabled,
+    &:disabled:hover,
+    &:disabled:active,
+    &:disabled:focus,
+    &.hearth-btn-dangerous:disabled,
+    &.hearth-btn-dangerous:disabled:hover,
+    &.hearth-btn-dangerous:disabled:active,
+    &.hearth-btn-dangerous:disabled:focus,
+    &.hearth-btn-focus:disabled {
+      background: transparent;
+      border: @hearth-button-border-width solid @hearth-global-color-gray-7;
+      opacity: @hearth-global-opacity-disabled;
+
+      .hearth-btn-content-color(@hearth-global-color-black);
+      .hearth-btn-static-text-color(@hearth-global-color-black);
+
+      &::before {
+        opacity: 0;
+      }
+
+      &.hearth-btn-minimal {
+        .minimal-styles;
+      }
+    }
+
+    &.hearth-btn-dangerous.hearth-btn-minimal:hover:not(.hearth-btn-compact, :disabled, .hearth-btn-stateless) {
+      background: @hearth-global-color-red-1;
+    }
+  }
+
+  & > &-icon {
+    display: inline-flex;
+  }
+}
+
+a.hearth-btn {
+  &-medium.hearth-btn-primary {
+    .hearth-btn-href(@hearth-button-line-height-medium, @hearth-button-padding-height-medium,
+    @hearth-button-padding-hor-medium, 0);
+  }
+
+  &-medium.hearth-btn-secondary,
+  &-medium.hearth-btn-accent {
+    .hearth-btn-href(@hearth-button-line-height-medium, @hearth-button-padding-height-medium,
+    @hearth-button-padding-hor-medium, @hearth-button-border-width);
+  }
+
+  &-large.hearth-btn-primary {
+    .hearth-btn-href(@hearth-button-line-height-large, @hearth-button-padding-height-large,
+    @hearth-button-padding-hor-large, 0);
+  }
+
+  &-large.hearth-btn-secondary,
+  &-large.hearth-btn-accent {
+    .hearth-btn-href(@hearth-button-line-height-large, @hearth-button-padding-height-large,
+    @hearth-button-padding-hor-large, @hearth-button-border-width);
+  }
+
+  &-medium.hearth-btn-compact.hearth-btn-primary {
+    min-width: 0;
+    .hearth-btn-href(@hearth-button-line-height-medium, @hearth-button-padding-height-medium-compact,
+    @hearth-button-padding-hor-compact, 0);
+  }
+
+  &-medium.hearth-btn-compact.hearth-btn-secondary,
+  &-medium.hearth-btn-compact.hearth-btn-accent {
+    min-width: 0;
+    .hearth-btn-href(@hearth-button-line-height-medium, @hearth-button-padding-height-medium-compact,
+    @hearth-button-padding-hor-compact, @hearth-button-border-width);
+  }
+
+  &-large.hearth-btn-compact.hearth-btn-primary {
+    min-width: 0;
+    .hearth-btn-href(@hearth-button-line-height-large, @hearth-button-padding-height-large-compact,
+    @hearth-button-padding-hor-compact, 0);
+  }
+
+  &-large.hearth-btn-compact.hearth-btn-secondary,
+  &-large.hearth-btn-compact.hearth-btn-accent {
+    min-width: 0;
+    .hearth-btn-href(@hearth-button-line-height-large, @hearth-button-padding-height-large-compact,
+    @hearth-button-padding-hor-compact, @hearth-button-border-width);
+  }
+}

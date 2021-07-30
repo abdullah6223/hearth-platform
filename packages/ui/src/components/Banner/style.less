@@ -1,0 +1,116 @@
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+
+.hearth-promo-block {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+  border-radius: @hearth-global-border-radius-large;
+  cursor: pointer;
+
+  &-image-container,
+  &-content-container {
+    box-sizing: border-box;
+    width: 50%;
+    height: 100%;
+  }
+
+  &-content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: @hearth-global-spacing-48 @hearth-global-spacing-32 @hearth-global-spacing-48 @hearth-global-spacing-72;
+  }
+
+  &-md > &-content-container,
+  &-sm > &-content-container {
+    padding: @hearth-global-spacing-52 @hearth-global-spacing-32 @hearth-global-spacing-52 @hearth-global-spacing-40;
+  }
+
+  &-xs > &-content-container {
+    padding: @hearth-global-spacing-40;
+  }
+
+  &-xxs > &-content-container {
+    padding: @hearth-global-spacing-40 @hearth-global-spacing-32;
+  }
+
+  &-no-image > &-content-container {
+    width: 100%;
+    padding-right: @hearth-global-spacing-60;
+  }
+
+  &-text-container {
+    & > *:not(:last-child) {
+      margin-bottom: @hearth-global-spacing-16;
+    }
+  }
+
+  &-small {
+    height: 180px;
+
+    .hearth-promo-block-content-container {
+      padding: @hearth-global-spacing-32 @hearth-global-spacing-40 @hearth-global-spacing-32 @hearth-global-spacing-40;
+
+      .hearth-promo-block-text-container {
+        width: 100%;
+
+        h4.hearth-typography {
+          margin-bottom: @hearth-global-spacing-12;
+        }
+      }
+    }
+  }
+
+  &-sm.hearth-promo-block-small,
+  &-xs.hearth-promo-block-small,
+  &-xxs.hearth-promo-block-small {
+    height: 172px;
+
+    .hearth-promo-block-content-container {
+      padding: @hearth-global-spacing-24 @hearth-global-spacing-24 @hearth-global-spacing-32;
+    }
+  }
+
+  &-xs.hearth-promo-block-small,
+  &-xxs.hearth-promo-block-small {
+    height: 196px;
+  }
+
+  &-md.hearth-promo-block-no-image > &-content-container,
+  &-sm.hearth-promo-block-no-image > &-content-container {
+    padding-right: @hearth-global-spacing-52;
+  }
+
+  &:not(.hearth-promo-block-no-image) .hearth-promo-block-text-container {
+    max-width: 480px;
+  }
+
+  &-action-link {
+    display: flex;
+    align-items: center;
+
+    & > .hearth-typography {
+      margin-right: @hearth-global-spacing-4;
+    }
+
+    .hearth-promo-block-action-icon {
+      margin-top: 3px;
+    }
+  }
+
+  &-image-container {
+    & > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+  }
+}

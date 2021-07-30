@@ -1,0 +1,73 @@
+@import "antd/lib/affix/style/index.less";
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/typography";
+@import (reference) "@open-hearth/ui/src/components/_utils/controls/style";
+@import (reference) "@open-hearth/ui/src/components/style/core/breakpoints.less";
+
+@hearth-action-bar-overflow-width: @hearth-global-spacing-16;
+@hearth-action-bar-width: calc(100% + @hearth-action-bar-overflow-width * 2);
+@hearth-action-bar-large-screen-bottom-indent: @hearth-global-spacing-24;
+@hearth-action-bar-container-padding: @hearth-global-spacing-40;
+
+.hearth-affix-placeholder {
+  height: @hearth-action-bar-large-screen-bottom-indent;
+}
+
+.hearth-affix-content-wrapper {
+  box-sizing: border-box;
+  height: fit-content !important;
+  padding: @hearth-action-bar-overflow-width;
+
+  @media @from-mobile-small and @to-tablet-small {
+    width: 100%;
+    padding-bottom: @hearth-action-bar-large-screen-bottom-indent;
+
+    & > .hearth-space-item {
+      width: 100%;
+
+      & > * {
+        width: 100%;
+      }
+    }
+  }
+
+  @media @from-mobile-small {
+    position: relative;
+    right: @hearth-action-bar-overflow-width;
+    width: @hearth-action-bar-width;
+  }
+
+  @media @from-tablet-large {
+    transition: box-shadow @hearth-global-transition-duration-default ease-out;
+  }
+}
+
+.hearth-affix {
+  height: auto !important;
+
+  & .hearth-affix-content-wrapper {
+    height: 100%;
+    background: @hearth-global-color-white;
+    border-radius: @hearth-global-border-radius-medium;
+    box-shadow: @hearth-global-box-shadow-default;
+  }
+
+  @media @from-mobile-small and @to-tablet-small {
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: auto !important;
+
+    & .hearth-affix-content-wrapper {
+      padding-bottom: @hearth-action-bar-large-screen-bottom-indent;
+
+      & > .hearth-space-item {
+        padding: 0  @hearth-global-spacing-16;
+      }
+    }
+  }
+
+  @media @from-tablet-large {
+    bottom: @hearth-action-bar-large-screen-bottom-indent !important;
+  }
+}
