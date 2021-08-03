@@ -1,0 +1,131 @@
+@import "antd/lib/switch/style/index.less";
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+
+// ant default - 24px
+@hearth-switch-height-default: 20px;
+// ant default - 44px
+@hearth-switch-min-width-default: 36px;
+// adt default - 18px
+@hearth-switch-handle-size-default: 16px;
+// ant default - 2px
+@hearth-switch-handle-space-to-borders-default: 1px;
+// ant default - calc(100% - 18px - 2px)
+@hearth-switch-checked-handle-space-left-default: calc(
+  100% - @hearth-switch-handle-size-default - @hearth-switch-handle-space-to-borders-default
+);
+
+// ant default - 16px
+@hearth-switch-height-small: 16px;
+// ant default - 36px
+@hearth-switch-min-width-small: 28px;
+// adt default - 16px
+@hearth-switch-handle-size-small: 12px;
+// ant default - 1px
+@hearth-switch-handle-space-to-borders-small: 1px;
+// ant default - calc(100% - 16px - 1px)
+@hearth-switch-checked-handle-space-left-small: calc(
+  100% - @hearth-switch-handle-size-small - @hearth-switch-handle-space-to-borders-small
+);
+
+@hearth-switch-border-width: 1px;
+@hearth-switch-focus-stroke-width: 2px;
+@hearth-switch-focus-stroke-padding: 3x;
+
+.gradient-border-overlay (@border-width: @hearth-switch-border-width, @padding: 0) {
+  position: absolute;
+  top: -@border-width - @padding;
+  right: -@border-width - @padding;
+  bottom: -@border-width - @padding;
+  left: -@border-width - @padding;
+  display: block;
+  background: @hearth-global-color-brand-gradient-5 border-box;
+  border: @border-width solid transparent;
+  border-radius: inherit;
+  content: "";
+  mask: linear-gradient(#111 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.hearth-switch {
+  min-width: @hearth-switch-min-width-default;
+  height: @hearth-switch-height-default;
+  background: transparent;
+  border: @hearth-switch-border-width solid @hearth-global-color-gray-5;
+
+  .hearth-switch-handle {
+    top: @hearth-switch-handle-space-to-borders-default;
+    left: @hearth-switch-handle-space-to-borders-default;
+    width: @hearth-switch-handle-size-default;
+    height: @hearth-switch-handle-size-default;
+
+    &::before {
+      background: @hearth-global-color-gray-5;
+      box-shadow: none;
+      transition: background 0ms;
+    }
+  }
+
+  &.hearth-switch-checked {
+    background: @hearth-global-color-brand-gradient-1;
+
+    // gradient border on hover
+    &::before {
+      .gradient-border-overlay();
+
+      opacity: 0;
+      transition: opacity @hearth-global-transition-duration-default;
+    }
+
+    .hearth-switch-handle {
+      left: @hearth-switch-checked-handle-space-left-default;
+
+      &::before {
+        background: @hearth-global-color-brand-gradient-5;
+      }
+    }
+
+    &:hover:not(.hearth-switch-disabled) {
+      border: @hearth-switch-border-width solid transparent;
+
+      &::before {
+        opacity: 1;
+      }
+    }
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    // gradient stroke on focus
+    &::after {
+      .gradient-border-overlay(@hearth-switch-focus-stroke-width, @hearth-switch-focus-stroke-padding);
+    }
+  }
+
+  &:hover:not(.hearth-switch-disabled) {
+    border-color: @hearth-global-color-gray-7;
+    transition: border-color 0ms;
+  }
+}
+
+.hearth-switch.hearth-switch-small {
+  min-width: @hearth-switch-min-width-small;
+  height: @hearth-switch-height-small;
+
+  .hearth-switch-handle {
+    top: @hearth-switch-handle-space-to-borders-small;
+    left: @hearth-switch-handle-space-to-borders-small;
+    width: @hearth-switch-handle-size-small;
+    height: @hearth-switch-handle-size-small;
+  }
+
+  &.hearth-switch-checked {
+    .hearth-switch-handle {
+      left: @hearth-switch-checked-handle-space-left-small;
+    }
+  }
+}

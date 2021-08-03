@@ -1,0 +1,95 @@
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/typography";
+@import (reference) "@open-hearth/ui/src/components/_utils/controls/style";
+
+@hearth-carousel-default-arrow-offset: @hearth-global-spacing-20;
+@hearth-steps-padding-lg: @hearth-global-spacing-24;
+@hearth-steps-hor-padding-sm: @hearth-global-spacing-20;
+@hearth-steps-padding-sm: @hearth-global-spacing-16 @hearth-steps-hor-padding-sm;
+@hearth-steps-gap: @hearth-global-spacing-24;
+
+.hearth-steps {
+  background: @hearth-global-color-gray-1;
+  border-radius: @hearth-global-border-radius-large;
+
+  &-large {
+    padding: @hearth-steps-padding-lg;
+
+    .hearth-carousel {
+      .slick-arrow.slick-next {
+        right: -@hearth-steps-padding-lg - (@hearth-control-lg-size / 2);
+      }
+
+      .slick-arrow.slick-prev {
+        left: -@hearth-steps-padding-lg - (@hearth-control-lg-size / 2);
+      }
+    }
+  }
+
+  &-small {
+    padding: @hearth-steps-padding-sm;
+
+    .hearth-carousel {
+      .slick-arrow.slick-next {
+        right: -@hearth-steps-hor-padding-sm - (@hearth-control-sm-size / 2);
+      }
+
+      .slick-arrow.slick-prev {
+        left: -@hearth-steps-hor-padding-sm - (@hearth-control-sm-size / 2);
+      }
+    }
+  }
+
+  .hearth-carousel {
+    .slick-list {
+      margin: 0 (-@hearth-steps-gap / 2);
+      padding: 0;
+    }
+
+    .slick-slide > div {
+      margin: 0 (@hearth-steps-gap / 2);
+    }
+  }
+
+  &-step {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 100%;
+    cursor: not-allowed;
+
+    .hearth-steps-step-index {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: @hearth-global-spacing-40;
+      height: @hearth-global-spacing-40;
+      color: @hearth-global-color-gray-7;
+      background: @hearth-global-color-gray-5;
+      border-radius: 50%;
+    }
+
+    &-small {
+      .hearth-steps-step-index {
+        width: @hearth-global-spacing-32;
+        height: @hearth-global-spacing-32;
+      }
+    }
+
+    &-active {
+      cursor: pointer;
+
+      .hearth-steps-step-index {
+        color: @hearth-global-color-white;
+        background: @hearth-global-color-black;
+      }
+    }
+
+    &-done {
+      .hearth-steps-step-index {
+        color: @hearth-global-color-white;
+        background: @hearth-global-color-brand-gradient-5;
+      }
+    }
+  }
+}
