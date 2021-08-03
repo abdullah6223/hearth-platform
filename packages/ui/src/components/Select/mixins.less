@@ -1,0 +1,16 @@
+.hearth-select-type(@type, @background-color) {
+  @class_postfix: ~"@{type}";
+
+  .hearth-select-@{class_postfix}:not(&-customize-input) &-selector {
+    background: @background-color;
+    border-color: transparent;
+  }
+}
+
+.hearth-select-type-disabled(@type, @disabled-color) {
+  @class_postfix: ~"@{type}";
+
+  .hearth-select-@{class_postfix}.hearth-select-disabled:not(.hearth-select-customize-input) .hearth-select-selector {
+    background-color: @disabled-color;
+  }
+}
