@@ -1,0 +1,55 @@
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/rich-content.less";
+
+.hearth-markdown-task-list-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.hearth-markdown {
+  .hearth-rich-content();
+
+  &--inline {
+    .hearth-rich-content-inline();
+  }
+
+  & > * {
+    margin-bottom: @hearth-global-spacing-20;
+  }
+
+  & > *:last-child {
+    margin-bottom: 0;
+  }
+
+  ul,
+  ol {
+    &.contains-task-list {
+      margin-bottom: 0;
+      padding-left: 0;
+
+      & > li {
+        list-style-type: none;
+
+        &:not(:last-child) {
+          margin-bottom: 0.5em;
+        }
+      }
+
+      & > li > ul.contains-task-list,
+      & > li > ol.contains-task-list {
+        margin-top: 0.5em;
+        margin-bottom: 0;
+        padding-left: @hearth-global-spacing-20;
+      }
+    }
+  }
+
+  .hearth-alert:not(:last-child) {
+    margin-bottom: @hearth-global-spacing-20;
+  }
+
+  .hearth-alert-description > .hearth-typography {
+    font-size: @hearth-global-font-size-text-m;
+  }
+}

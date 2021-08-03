@@ -1,0 +1,158 @@
+@import "antd/lib/modal/style/index.less";
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/core/breakpoints.less";
+
+@hearth-modal-margin-vertical: @hearth-global-spacing-40;
+@hearth-modal-margin-horizontal: @hearth-global-spacing-40;
+@hearth-modal-border-width: @hearth-global-border-width-default;
+@hearth-modal-padding: @hearth-global-spacing-40;
+@hearth-modal-half-padding: (@hearth-modal-padding / 2);
+@hearth-modal-half-padding-without-border: @hearth-modal-half-padding - @hearth-modal-border-width;
+@hearth-modal-close-icon-width: 24px;
+@hearth-modal-close-icon-height: 24px;
+@hearth-modal-close-icon-top: @hearth-modal-padding +
+  ((@hearth-global-line-height-h3 - @hearth-modal-close-icon-height) / 2);
+@hearth-modal-header-padding-right: (@hearth-modal-padding * 2) + @hearth-modal-close-icon-width;
+@hearth-modal-header-scrolling-border-bottom-color: @hearth-global-color-gray-3;
+@hearth-modal-footer-buttons-gap: @hearth-global-spacing-20;
+@hearth-modal-mobile-spacing: @hearth-global-spacing-24;
+@hearth-modal-mobile-header-padding-right: @hearth-modal-mobile-spacing + @hearth-modal-close-icon-width;
+
+.hearth-modal-root {
+  .hearth-modal-mask {
+    // NOTE: To correctly animate the mask, need to use the color in RGBa format
+    background-color: fade(@hearth-global-color-gray-7, 50%);
+  }
+
+  .hearth-modal {
+    max-width: calc(100vw - @hearth-modal-margin-horizontal * 2);
+    margin: @hearth-modal-margin-vertical 0;
+    animation-duration: 0s;
+
+    .hearth-modal-header {
+      flex-shrink: 0;
+      padding:
+        @hearth-modal-padding
+        @hearth-modal-header-padding-right
+        @hearth-modal-half-padding-without-border
+        @hearth-modal-padding;
+      border-bottom: @hearth-global-border-width-default solid transparent;
+      transition: border-bottom-color @hearth-global-transition-duration-default;
+    }
+
+    &.hearth-modal-scrolling {
+      .hearth-modal-header {
+        border-bottom-color: @hearth-modal-header-scrolling-border-bottom-color;
+      }
+    }
+
+    .hearth-modal-close {
+      top: @hearth-modal-close-icon-top;
+      right: @hearth-modal-padding;
+
+      .hearth-modal-close-x {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: @hearth-modal-close-icon-width;
+        height: @hearth-modal-close-icon-height;
+        line-height: @hearth-modal-close-icon-height;
+
+        div {
+          width: @hearth-modal-close-icon-width;
+          height: @hearth-modal-close-icon-height;
+        }
+      }
+    }
+
+    .hearth-modal-content {
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - (@hearth-modal-margin-vertical * 2));
+      padding: 0;
+      overflow: hidden;
+      border-radius: @hearth-global-border-radius-large;
+    }
+
+    .hearth-modal-body {
+      margin: 0 @hearth-modal-padding;
+      padding: @hearth-modal-half-padding 0 @hearth-modal-padding;
+      overflow: auto;
+
+      .hearth-modal-wrapper {
+        width: fit-content;
+        min-width: 100%;
+        padding: 1px;
+        overflow: hidden;
+      }
+    }
+
+    &.hearth-modal-fixed-width {
+      .hearth-modal-body {
+        overflow-x: hidden;
+
+        .hearth-modal-wrapper {
+          width: 100%;
+        }
+      }
+    }
+
+    .hearth-modal-footer {
+      padding: @hearth-modal-half-padding-without-border @hearth-modal-padding @hearth-modal-half-padding;
+      border-top: @hearth-global-border-width-default solid @hearth-modal-header-scrolling-border-bottom-color;
+
+      > .hearth-btn + .hearth-btn:not(.hearth-dropdown-trigger) {
+        margin-left: 0;
+      }
+    }
+
+    @media @from-mobile-small and @to-tablet-small {
+      position: absolute;
+      top: initial;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: auto !important;
+      max-width: 100%;
+      margin: @hearth-global-spacing-16;
+
+      .hearth-modal-header {
+        padding:
+          @hearth-modal-mobile-spacing
+          @hearth-modal-mobile-header-padding-right
+          @hearth-modal-mobile-spacing
+          @hearth-modal-mobile-spacing;
+      }
+
+      .hearth-modal-close {
+        top: @hearth-modal-mobile-spacing;
+        right: @hearth-modal-mobile-spacing;
+      }
+
+      .hearth-modal-body {
+        margin: 0 @hearth-modal-mobile-spacing;
+        padding: 0 0 @hearth-modal-mobile-spacing;
+      }
+
+      .hearth-modal-footer {
+        padding: @hearth-modal-mobile-spacing;
+
+        > .hearth-btn {
+          width: 100%;
+
+          &:not(:first-child) {
+            margin-top: @hearth-global-spacing-16;
+          }
+        }
+      }
+    }
+
+    @media @from-tablet-large {
+      .hearth-modal-footer {
+        > .hearth-btn + .hearth-btn:not(.hearth-dropdown-trigger, :first-child) {
+          margin-left: @hearth-global-spacing-16;
+        }
+      }
+    }
+  }
+}

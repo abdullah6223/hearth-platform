@@ -1,0 +1,33 @@
+@import "antd/lib/list/style/index.less";
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+
+.hearth-list {
+  .hearth-list-header {
+    padding-top: 0;
+    padding-bottom: @hearth-global-spacing-24;
+    border-bottom: none;
+  }
+
+  .hearth-list-item {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    width: 100%;
+    padding: 6px 0;
+    border-bottom: none;
+  }
+
+  .hearth-list-item .hearth-typography {
+    max-width: 40%;
+  }
+
+  .hearth-list-item .hearth-typography:last-of-type {
+    text-align: right;
+  }
+
+  .hearth-list-item-divider {
+    flex: 1;
+    margin: 0 @hearth-global-spacing-8;
+    border-bottom: @hearth-global-border-width-default solid @hearth-global-color-gray-3;
+  }
+}
