@@ -1,0 +1,20 @@
+@import "antd/lib/tooltip/style/index.less";
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+
+.hearth-tooltip > .hearth-tooltip-content {
+  .hearth-tooltip-inner {
+    min-height: 0;
+    padding: @hearth-global-spacing-12;
+    color: @hearth-global-color-black;
+    font-size: @hearth-global-font-size-text-s;
+    font-family: @hearth-global-font-family-default;
+    line-height: @hearth-global-typography-text-s-line-height;
+    background-color: @hearth-global-color-white;
+    border-radius: @hearth-global-border-radius-large;
+    box-shadow: @hearth-global-box-shadow-default;
+  }
+
+  .hearth-tooltip-arrow {
+    display: none;
+  }
+}

@@ -1,0 +1,207 @@
+@import "antd/lib/tooltip/style/index.less";
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/typography.less";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/transition";
+@import "@open-hearth/ui/src/components/style/mixins/link.less";
+
+.hearth-typography {
+  @hearth-typography-decoration-thickness: 1px;
+  .hearth-transition(color, opacity, text-decoration-color;);
+
+  word-break: break-word;
+
+  &-break-spaces {
+    white-space: break-spaces;
+  }
+
+  &,
+  &-large {
+    .hearth-typography-text-large();
+  }
+
+  &-medium {
+    .hearth-typography-text-medium();
+  }
+
+  &-small {
+    .hearth-typography-text-small();
+  }
+
+  &-primary {
+    color: @hearth-global-color-black;
+  }
+
+  &-secondary {
+    color: @hearth-global-color-gray-7;
+  }
+
+  &-inverted {
+    color: @hearth-global-color-white;
+  }
+
+  &-info {
+    color: @hearth-global-color-blue-5;
+  }
+
+  &-success {
+    color: @hearth-global-color-green-5;
+  }
+
+  &-warning {
+    color: @hearth-global-color-orange-5;
+  }
+
+  &-danger {
+    color: @hearth-global-color-red-5;
+  }
+
+  &-inherit {
+    color: inherit;
+  }
+
+  &-disabled {
+    cursor: not-allowed;
+    opacity: @hearth-global-opacity-disabled;
+    user-select: none;
+  }
+
+  &-clickable {
+    cursor: pointer;
+  }
+
+  u,
+  ins {
+    text-decoration: underline;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: @hearth-typography-decoration-thickness;
+  }
+
+  s,
+  del {
+    text-decoration: line-through;
+    text-decoration-thickness: @hearth-typography-decoration-thickness;
+  }
+
+  strong {
+    font-weight: @hearth-global-font-weight-semibold;
+  }
+
+  code {
+    box-sizing: border-box;
+    margin: 0 0.2em;
+    padding: 0.25em 0.4em;
+    font-size: 95%;
+    font-family: "Noto Sans Mono", monospace;
+    background: @hearth-global-color-gray-1;
+    border: @hearth-global-border-width-default solid @hearth-global-color-gray-3;
+    border-radius: @hearth-global-border-radius-small;
+  }
+
+  div&:not(:last-of-type),
+  p:not(:last-of-type) {
+    margin-bottom: @hearth-global-typography-text-l-paragraph-spacing;
+
+    &.hearth-typography-medium {
+      margin-bottom: @hearth-global-typography-text-m-paragraph-spacing;
+    }
+
+    &.hearth-typography-small {
+      margin-bottom: @hearth-global-typography-text-s-paragraph-spacing;
+    }
+  }
+
+  h1&,
+  div&-h1,
+  div&-h1 > textarea,
+  h1 {
+    .hearth-typography-h1();
+  }
+
+  h2&,
+  div&-h2,
+  div&-h2 > textarea,
+  h2 {
+    .hearth-typography-h2();
+  }
+
+  h3&,
+  div&-h3,
+  div&-h3 > textarea,
+  h3 {
+    .hearth-typography-h3();
+  }
+
+  h4&,
+  div&-h4,
+  div&-h4 > textarea,
+  h4 {
+    .hearth-typography-h4();
+  }
+
+  h5&,
+  div&-h5,
+  div&-h5 > textarea,
+  h5 {
+    .hearth-typography-h5();
+  }
+
+  h6&,
+  div&-h6,
+  div&-h6 > textarea,
+  h6 {
+    .hearth-typography-h6();
+  }
+
+  a&-ellipsis,
+  span&-ellipsis {
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  a&,
+  a {
+    .hearth-link();
+
+    &:not(.hearth-typography-large, .hearth-typography-medium, .hearth-typography-small) {
+      font-size: inherit;
+    }
+
+    &[disabled],
+    &.hearth-typography-disabled {
+      &,
+      &:focus-visible,
+      &:hover,
+      &:active {
+        color: @hearth-global-color-black;
+        cursor: not-allowed;
+        opacity: @hearth-global-opacity-disabled;
+        pointer-events: none;
+      }
+    }
+  }
+
+  &-single-line {
+    white-space: nowrap;
+  }
+
+  &-ellipsis-single-line {
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    // https://blog.csdn.net/iefreer/article/details/50421025
+    a&,
+    span& {
+      vertical-align: bottom;
+    }
+  }
+
+  &-ellipsis-multiple-line {
+    /* stylelint-disable-next-line value-no-vendor-prefix */
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 3;
+
+    /*! autoprefixer: ignore next */
+    -webkit-box-orient: vertical;
+  }
+}

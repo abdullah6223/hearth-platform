@@ -1,0 +1,32 @@
+@import "antd/lib/tag/style/index.less";
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/typography";
+
+.hearth-tag {
+  .hearth-typography-h6();
+
+  margin: 0;
+  padding: 0.2em 0.83em 0.3em;
+  border: none;
+  border-radius: @hearth-global-border-radius-large;
+
+  &-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .hearth-tag-icon-start,
+    .hearth-tag-icon-end {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .hearth-tag-icon-start {
+      margin-right: 4px;
+    }
+
+    .hearth-tag-icon-end {
+      margin-left: 4px;
+    }
+  }
+}

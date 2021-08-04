@@ -1,0 +1,52 @@
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+
+.hearth-typography {
+  &-rtl {
+    direction: rtl;
+  }
+
+  &-expand {
+    .hearth-typography-rtl & {
+      float: left;
+      margin-right: 4px;
+      margin-left: 0;
+    }
+  }
+
+  // Operation
+  &-edit,
+  &-copy {
+    .hearth-typography-rtl & {
+      margin-right: 4px;
+      margin-left: 0;
+    }
+  }
+
+  // Text input area
+  &-edit-content {
+    div& {
+      &.hearth-typography-rtl {
+        right: -@hearth-global-spacing-4 - 1px;
+        left: auto;
+      }
+    }
+
+    &-confirm {
+      .hearth-typography-rtl & {
+        right: auto;
+        left: 10px;
+      }
+    }
+  }
+
+  // list
+  ul,
+  ol {
+    li {
+      .hearth-typography-rtl& {
+        margin: 0 20px 0 0;
+        padding: 0 4px 0 0;
+      }
+    }
+  }
+}

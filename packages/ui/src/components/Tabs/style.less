@@ -1,0 +1,111 @@
+@import "antd/lib/tabs/style/index.less";
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/typography";
+@import (reference) "@open-hearth/ui/src/components/style/core/breakpoints.less";
+
+@tabs-horizontal-gutter: @hearth-global-spacing-20;
+@tabs-card-active-color: @hearth-global-color-black;
+@tabs-highlight-color: @hearth-global-color-black;
+@tabs-ink-bar-color: @hearth-global-color-black;
+@tabs-active-color: @hearth-global-color-black;
+@tabs-hover-color: @hearth-global-color-black;
+@tabs-bar-margin: 0 0 @hearth-global-spacing-40 0;
+
+.hearth-tabs {
+  &-tab {
+    padding: @hearth-global-spacing-4 0 @hearth-global-spacing-12;
+
+    @media @to-tablet-small {
+      padding-bottom: @hearth-global-spacing-12 + @hearth-global-line-height-h4 - @hearth-global-line-height-h4-sm;
+    }
+  }
+
+  &-tab-btn {
+    .hearth-typography-h4();
+
+    color: @hearth-global-color-gray-7;
+  }
+
+  &-tab-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    & > *:not(:last-child) {
+      margin-right: @hearth-global-spacing-8;
+    }
+  }
+
+  &-tab-disabled {
+    .hearth-tabs-tab-btn,
+    .hearth-tabs-tab-btn:active {
+      color: @hearth-global-color-gray-7 !important;
+      opacity: @hearth-global-opacity-disabled;
+    }
+  }
+
+  &-tab.hearth-tabs-tab-active {
+    .hearth-tabs-tab-btn {
+      text-shadow: none;
+    }
+  }
+
+  & > .hearth-tabs-nav,
+  & > div > .hearth-tabs-nav {
+    flex-wrap: wrap;
+    gap: @hearth-global-spacing-24;
+
+    .hearth-tabs-nav-wrap::before {
+      width: @hearth-global-spacing-40;
+      box-shadow:
+        inset @hearth-global-spacing-40 0
+        @hearth-global-spacing-40 -@hearth-global-spacing-40
+        @hearth-global-color-white;
+    }
+
+    .hearth-tabs-nav-wrap::after {
+      width: @hearth-global-spacing-40;
+      box-shadow:
+        inset -@hearth-global-spacing-40 0
+        @hearth-global-spacing-40 -@hearth-global-spacing-40
+        @hearth-global-color-white;
+    }
+
+    .hearth-tabs-nav-operations {
+      display: none;
+    }
+  }
+
+  &-top {
+    & > .hearth-tabs-nav .hearth-tabs-ink-bar {
+      height: 3px;
+    }
+
+    .hearth-tabs-nav::before {
+      display: none;
+    }
+  }
+
+  &-dropdown {
+    &-menu {
+      border-radius: @hearth-global-border-radius-medium;
+
+      &-item:hover {
+        background-color: @hearth-global-color-gray-1;
+      }
+
+      &-item-disabled {
+        .hearth-tabs-tab-label > span {
+          opacity: @hearth-global-opacity-disabled;
+        }
+      }
+    }
+
+    & .hearth-tabs-tab-label {
+      justify-content: flex-start;
+      color: @hearth-global-color-gray-7;
+      .hearth-typography-h5();
+    }
+  }
+}
