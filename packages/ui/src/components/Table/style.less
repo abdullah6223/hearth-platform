@@ -1,0 +1,601 @@
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+
+.hearth-table-container {
+  position: relative;
+  width: 100%;
+  font-family: @hearth-global-font-family-default;
+}
+
+.hearth-table-wrapper {
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: auto;
+  background-color: @hearth-global-color-white;
+  border: @hearth-global-border-width-default solid @hearth-global-color-gray-5;
+  border-radius: @hearth-global-border-radius-large;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.hearth-table {
+  width: fit-content;
+}
+
+.hearth-table-thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  min-width: fit-content;
+}
+
+.hearth-table-tbody {
+  display: flex;
+  flex-direction: column;
+  min-width: fit-content;
+}
+
+.hearth-table-loading-placeholder {
+  min-height: 200px;
+}
+
+.hearth-table-loading-overlay {
+  position: absolute;
+  inset: 50px 0 0 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.hearth-table-loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid @hearth-global-color-gray-1;
+  border-top: 3px solid @hearth-global-color-green-5;
+  border-radius: 50%;
+  animation: hearth-table-loading-spin 1s linear infinite;
+}
+
+@keyframes hearth-table-loading-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.hearth-table-th-more-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: all @hearth-global-transition-duration-default ease;
+}
+
+.hearth-table-th {
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 16px 12px;
+  color: @hearth-global-color-gray-7;
+  font-weight: 600;
+  font-size: 12px;
+  background-color: @hearth-global-color-white;
+  border: none;
+  border-bottom: @hearth-global-border-width-default solid @hearth-global-color-gray-5;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background-color: @hearth-global-color-gray-1;
+
+    .hearth-table-th-more-icon {
+      color: @hearth-global-color-gray-7;
+      opacity: 1;
+    }
+
+    .hearth-table-th-more-icon:hover {
+      color: @hearth-global-color-green-5;
+      opacity: 1;
+    }
+  }
+
+  &.non-sortable {
+    cursor: default;
+  }
+
+  &.hearth-table-th-active {
+    background: @hearth-global-color-gray-1;
+  }
+
+  &:first-child {
+    border-top-left-radius: @hearth-global-border-radius-large;
+  }
+
+  &:last-child {
+    border-right: none;
+    border-top-right-radius: @hearth-global-border-radius-large;
+  }
+}
+
+.hearth-table-th-content {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.hearth-table-th-title-content {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.hearth-table-th-selection {
+  overflow: visible;
+
+  .hearth-table-th-title-content {
+    overflow: visible;
+  }
+}
+
+.hearth-table-th-icons {
+  display: flex;
+  gap: 8px;
+}
+
+.hearth-table-th-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 100;
+  display: block;
+  width: 4px;
+  height: 100%;
+  padding: 0;
+  background-color: @hearth-global-color-white;
+  border: none;
+  cursor: col-resize;
+  user-select: none;
+
+  &:hover {
+    background-color: @hearth-global-color-green-5;
+  }
+
+  &::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1000;
+    width: 4px;
+    height: 100%;
+    content: "";
+  }
+}
+
+.hearth-table-th-resize-handle .hearth-table-th-resize-handle-active {
+  background-color: @hearth-global-color-gray-1;
+}
+
+.hearth-table-th-resizing .hearth-table-th-resize-handle::after {
+  position: absolute;
+  top: 0;
+  right: var(--resize-line-position, 0);
+  width: 4px;
+  height: 100vh;
+  background-color: @hearth-global-color-green-5;
+  content: "";
+  pointer-events: none;
+}
+
+.hearth-table-td {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 16px 12px;
+  color: @hearth-global-color-black;
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  border: none;
+  border-bottom: @hearth-global-border-width-default solid @hearth-global-color-gray-5;
+
+  .hearth-table-tr:last-child & {
+    border-bottom: none;
+  }
+}
+
+.hearth-table-cell-skeleton {
+  width: 100%;
+  height: 24px;
+  background:
+    linear-gradient(
+      90deg,
+      @hearth-global-color-gray-3 25%,
+      @hearth-global-color-gray-5 37%,
+      @hearth-global-color-gray-3 63%
+    );
+  background-size: 400% 100%;
+  border-radius: 6px;
+  animation: hearth-skeleton-loading 1.4s ease infinite;
+}
+
+@keyframes hearth-skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+.hearth-table-tr {
+  display: flex;
+  outline: none;
+  transition: background-color @hearth-global-transition-duration-default ease;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.hoverable {
+    cursor: pointer;
+  }
+
+  &:hover {
+    background-color: @hearth-global-color-gray-1;
+
+    .hearth-table-td {
+      background-color: @hearth-global-color-gray-1;
+    }
+  }
+
+  &:focus {
+    outline: 2px solid @hearth-global-color-green-5;
+    outline-offset: -2px;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  &[role="button"] {
+    cursor: pointer;
+  }
+}
+
+.hearth-table-column-settings-dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hearth-table-column-settings-dropdown:has(.hearth-table-column-settings-item.is-dragging) {
+  * {
+    cursor: grabbing !important;
+  }
+}
+
+.hearth-table-column-settings-item {
+  position: relative;
+  height: auto;
+  background-color: transparent;
+  border-radius: 4px;
+  transition: background-color @hearth-global-transition-duration-default ease;
+
+  &.is-dragging {
+    opacity: 0.3 !important;
+  }
+}
+
+.hearth-table-grip-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  color: @hearth-global-color-gray-5;
+  background-color: transparent;
+  border-radius: 4px;
+  outline: none;
+  transition: all @hearth-global-transition-duration-default ease;
+
+  &:hover {
+    cursor: grab;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &:focus {
+    outline: 2px solid @hearth-global-color-green-5;
+    outline-offset: 2px;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+.hearth-table-switch-container {
+  display: block;
+  outline: none;
+  cursor: pointer;
+
+  &:focus {
+    outline: 2px solid @hearth-global-color-green-5;
+    outline-offset: 2px;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  &[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.hearth-table-pagination-chip() {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 10px;
+  color: @hearth-global-color-gray-7;
+  background-color: @hearth-global-color-white;
+  border: @hearth-global-border-width-default solid @hearth-global-color-gray-5;
+  border-radius: @hearth-global-border-radius-medium;
+  transition: all @hearth-global-transition-duration-default ease;
+}
+
+// Pagination. Replace antd styles
+.hearth-table-pagination {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  margin: 0;
+  padding: 16px 0;
+  list-style: none;
+
+  li {
+    margin: 0;
+  }
+
+  .hearth-item {
+    .hearth-table-pagination-chip();
+
+    a {
+      color: inherit;
+    }
+  }
+
+  .hearth-prev,
+  .hearth-next,
+  .hearth-jump-prev,
+  .hearth-jump-next {
+    .hearth-item-link {
+      .hearth-table-pagination-chip();
+    }
+  }
+
+  .hearth-jump-prev,
+  .hearth-jump-next {
+    .hearth-item-link {
+      position: relative;
+      padding: 0;
+
+      .hearth-item-link-icon {
+        color: @hearth-global-color-green-5;
+        font-size: 12px;
+        vertical-align: 0;
+        opacity: 0;
+        transition: opacity @hearth-global-transition-duration-default ease;
+      }
+
+      .hearth-item-link-icon-svg {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 12px;
+        height: 12px;
+        margin: auto;
+      }
+
+      .hearth-item-ellipsis {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        color: rgb(0 0 0 / 25%);
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1;
+        text-align: center;
+        text-indent: 0;
+        background: transparent;
+        border: none;
+        opacity: 1;
+        transition: opacity @hearth-global-transition-duration-default ease;
+      }
+
+      &:hover .hearth-item-link-icon,
+      &:focus-visible .hearth-item-link-icon {
+        opacity: 1;
+      }
+
+      &:hover .hearth-item-ellipsis,
+      &:focus-visible .hearth-item-ellipsis {
+        opacity: 0;
+      }
+    }
+  }
+
+  .hearth-prev.hearth-disabled .hearth-item-link,
+  .hearth-next.hearth-disabled .hearth-item-link {
+    color: @hearth-global-color-gray-5;
+    background-color: @hearth-global-color-gray-1;
+    border-color: @hearth-global-color-gray-3;
+  }
+
+  .hearth-item:hover,
+  .hearth-jump-prev .hearth-item-link:hover,
+  .hearth-jump-next .hearth-item-link:hover,
+  .hearth-prev:not(.hearth-disabled) .hearth-item-link:hover,
+  .hearth-next:not(.hearth-disabled) .hearth-item-link:hover {
+    color: @hearth-global-color-green-5;
+    border-color: @hearth-global-color-green-5;
+  }
+
+  .hearth-item-active {
+    color: @hearth-global-color-green-5;
+    background-color: @hearth-global-color-green-1;
+    border-color: @hearth-global-color-green-5;
+
+    a {
+      color: @hearth-global-color-green-5;
+    }
+  }
+}
+
+.hearth-dropdown-menu-item-inner {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+}
+
+.hearth-table-icon {
+  svg {
+    color: @hearth-global-color-gray-7;
+  }
+
+  transition: color @hearth-global-transition-duration-default ease;
+}
+
+.hearth-table-icon-green {
+  svg {
+    color: @hearth-global-color-green-5;
+  }
+}
+
+.hearth-table-icon-gray {
+  svg {
+    color: @hearth-global-color-gray-7;
+  }
+}
+
+.hearth-table-icon-black {
+  svg {
+    color: @hearth-global-color-black;
+  }
+}
+
+.hearth-table-empty-icon {
+  svg {
+    color: @hearth-global-color-gray-7;
+  }
+}
+
+.hearth-dropdown-menu-item-inner-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  &:hover {
+    svg {
+      color: @hearth-global-color-green-5;
+    }
+  }
+}
+
+.hearth-dropdown-menu-item-container {
+  padding: 0 !important;
+
+  &:hover {
+    color: @hearth-global-color-green-5;
+
+    .hearth-dropdown-menu-item-inner-left svg {
+      color: @hearth-global-color-green-5;
+    }
+  }
+}
+
+.hearth-dropdown-menu-item-inner-left-active {
+  color: @hearth-global-color-green-5;
+}
+
+.hearth-table-pagination-size-selector {
+  padding: 4px 8px;
+  color: @hearth-global-color-black;
+  font-size: 14px;
+  background: @hearth-global-color-white;
+  border: @hearth-global-border-width-default solid @hearth-global-color-green-5;
+  border-radius: 6px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: @hearth-global-color-green-5;
+  }
+
+  &:focus {
+    border-color: @hearth-global-color-green-5;
+    outline: none;
+    box-shadow: 0 0 0 2px @hearth-global-color-green-1;
+  }
+}
+
+.hearth-table-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 40px 20px;
+  background: @hearth-global-color-white;
+  border-radius: @hearth-global-border-radius-large;
+}
+
+.hearth-table-empty-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  color: @hearth-global-color-gray-7;
+  font-size: 14px;
+  text-align: center;
+}
+
+.hearth-dropdown-menu-item-wrapper {
+  padding: 16px;
+  background-color: @hearth-global-color-white;
+  border-radius: @hearth-global-border-radius-large;
+  box-shadow:
+    0 3px 6px -4px rgb(0 0 0 / 12%),
+    0 6px 16px 0 rgb(0 0 0 / 8%),
+    0 9px 28px 8px rgb(0 0 0 / 5%);
+}
+
+.hearth-dropdown-menu-item-wrapper-reset-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+}
