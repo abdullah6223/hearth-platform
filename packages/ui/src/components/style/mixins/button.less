@@ -1,0 +1,65 @@
+.hearth-btn-base(@line-height, @height, @border-width) {
+  box-sizing: border-box;
+  height: @height;
+  line-height: @line-height;
+  border-width: @border-width;
+}
+
+.hearth-btn(@line-height, @height, @hor-padding, @border-width) {
+  .hearth-btn-base(@line-height, @height, @border-width);
+
+  padding: 0 @hor-padding - @border-width;
+}
+
+.hearth-btn-href(@line-height, @height, @hor-padding, @border-width) {
+  .hearth-btn-base(@line-height, @height, @border-width);
+
+  padding: 0 @hor-padding - @border-width !important;
+}
+
+.hearth-btn-layer(@margin) {
+  position: absolute;
+  top: @margin;
+  right: @margin;
+  bottom: @margin;
+  left: @margin;
+  display: block;
+  border-radius: inherit;
+  content: "";
+}
+
+.hearth-btn-gradient-text-layer (@text-color, @hover-text-color) {
+  & > .hearth-btn-text {
+    position: relative;
+    color: @text-color;
+
+    &::before {
+      background: @hover-text-color;
+      .hearth-btn-layer(0);
+
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      opacity: 0;
+      transition: opacity @hearth-global-transition-duration-default ease-out;
+      content: attr(data-before);
+    }
+  }
+}
+
+.hearth-btn-static-text-color (@text-color) {
+  & > .hearth-btn-text {
+    color: @text-color;
+    transition: color @hearth-global-transition-duration-default ease-out;
+  }
+}
+
+.hearth-btn-content-color (@icon-color) {
+  & > span {
+    color: @icon-color;
+    transition: color @hearth-global-transition-duration-default ease-out;
+
+    & svg {
+      fill: currentcolor;
+    }
+  }
+}

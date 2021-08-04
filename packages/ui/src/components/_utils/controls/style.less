@@ -1,0 +1,39 @@
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+
+@hearth-control-lg-size: 40px;
+@hearth-control-sm-size: 28px;
+
+.hearth-control(@size, @gap) {
+  gap: @gap;
+  width: @size !important;
+  height: @size !important;
+}
+
+.hearth-control {
+  .hearth-control(@hearth-control-lg-size, (@hearth-control-lg-size / 4));
+
+  display: flex !important;
+  align-items: center;
+  box-sizing: border-box;
+  color: @hearth-global-color-gray-7 !important;
+  background: @hearth-global-color-white !important;
+  border: @hearth-global-border-width-default solid @hearth-global-color-white !important;
+  border-radius: 50%;
+  box-shadow: @hearth-global-box-shadow-default;
+  transition-timing-function: ease-out;
+  transition-duration: @hearth-global-transition-duration-default;
+  transition-property: color, border;
+
+  &:hover {
+    color: @hearth-global-color-black !important;
+    border: @hearth-global-border-width-default solid @hearth-global-color-gray-3 !important;
+  }
+
+  &-prev {
+    scale: -1 1;
+  }
+
+  &-small {
+    .hearth-control(@hearth-control-sm-size, ((@hearth-control-sm-size - @hearth-global-spacing-16) / 2));
+  }
+}
