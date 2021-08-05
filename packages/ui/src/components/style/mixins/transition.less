@@ -1,0 +1,7 @@
+// NOTE: The semicolon in the mixin call ".hearth-transition(color, opacity;);" is very important.
+// If it is omitted, the comma between the two parameters will be deleted which ends up in an invalid css rule.
+.hearth-transition(@transition-property...) {
+  transition-timing-function: ease-in;
+  transition-duration: @hearth-global-transition-duration-default;
+  transition-property: @transition-property;
+}

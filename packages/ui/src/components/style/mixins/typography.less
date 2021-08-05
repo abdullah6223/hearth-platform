@@ -1,0 +1,125 @@
+@import (reference) "@open-hearth/ui/src/components/style/core/breakpoints.less";
+
+.hearth-typography-layer(@font-family, @font-weight, @line-height, @font-size, @letter-spacing, @paragraph-spacing) {
+  margin: 0;
+  font-weight: @font-weight;
+  font-size: @font-size;
+  font-family: @font-family;
+  line-height: @line-height;
+  letter-spacing: @letter-spacing;
+}
+
+.hearth-typography-header(@font-family, @font-weight, @line-height, @font-size, @letter-spacing, @paragraph-spacing) {
+  .hearth-typography-layer(@font-family, @font-weight, @line-height, @font-size, @letter-spacing, @paragraph-spacing);
+
+  margin: 0;
+}
+
+.hearth-typography-h1() {
+  .hearth-typography-header(
+    @hearth-global-typography-h1-font-family,
+    @hearth-global-typography-h1-font-weight,
+    @hearth-global-typography-h1-line-height,
+    @hearth-global-typography-h1-font-size,
+    @hearth-global-typography-h1-letter-spacing,
+    @hearth-global-typography-h1-paragraph-spacing
+  );
+
+  @media @to-tablet-small {
+    font-size: @hearth-global-font-size-h1-sm;
+    line-height: @hearth-global-line-height-h1-sm;
+  }
+}
+
+.hearth-typography-h2() {
+  .hearth-typography-header(
+    @hearth-global-typography-h2-font-family,
+    @hearth-global-typography-h2-font-weight,
+    @hearth-global-typography-h2-line-height,
+    @hearth-global-typography-h2-font-size,
+    @hearth-global-typography-h2-letter-spacing,
+    @hearth-global-typography-h2-paragraph-spacing
+  );
+}
+
+.hearth-typography-h3() {
+  .hearth-typography-header(
+    @hearth-global-typography-h3-font-family,
+    @hearth-global-typography-h3-font-weight,
+    @hearth-global-typography-h3-line-height,
+    @hearth-global-typography-h3-font-size,
+    @hearth-global-typography-h3-letter-spacing,
+    @hearth-global-typography-h3-paragraph-spacing
+  );
+}
+
+.hearth-typography-h4() {
+  .hearth-typography-header(
+    @hearth-global-typography-h4-font-family,
+    @hearth-global-typography-h4-font-weight,
+    @hearth-global-typography-h4-line-height,
+    @hearth-global-typography-h4-font-size,
+    @hearth-global-typography-h4-letter-spacing,
+    @hearth-global-typography-h4-paragraph-spacing
+  );
+
+  @media @to-tablet-small {
+    font-size: @hearth-global-font-size-h4-sm;
+    line-height: @hearth-global-line-height-h4-sm;
+  }
+}
+
+.hearth-typography-h5() {
+  .hearth-typography-header(
+    @hearth-global-typography-h5-font-family,
+    @hearth-global-typography-h5-font-weight,
+    @hearth-global-typography-h5-line-height,
+    @hearth-global-typography-h5-font-size,
+    @hearth-global-typography-h5-letter-spacing,
+    @hearth-global-typography-h5-paragraph-spacing
+  );
+}
+
+.hearth-typography-h6() {
+  .hearth-typography-header(
+    @hearth-global-typography-h6-font-family,
+    @hearth-global-typography-h6-font-weight,
+    @hearth-global-typography-h6-line-height,
+    @hearth-global-typography-h6-font-size,
+    @hearth-global-typography-h6-letter-spacing,
+    @hearth-global-typography-h6-paragraph-spacing
+  );
+}
+
+.hearth-typography-text-large() {
+  .hearth-typography-layer(
+    @hearth-global-typography-text-l-font-family,
+    @hearth-global-typography-text-l-font-weight,
+    @hearth-global-typography-text-l-line-height,
+    @hearth-global-typography-text-l-font-size,
+    @hearth-global-typography-text-l-letter-spacing,
+    @hearth-global-typography-text-l-paragraph-spacing
+  );
+}
+
+.hearth-typography-text-medium() {
+  .hearth-typography-layer(
+    @hearth-global-typography-text-m-font-family,
+    @hearth-global-typography-text-m-font-weight,
+    @hearth-global-typography-text-m-line-height,
+    @hearth-global-typography-text-m-font-size,
+    @hearth-global-typography-text-m-letter-spacing,
+    @hearth-global-typography-text-m-paragraph-spacing
+  );
+}
+
+.hearth-typography-text-small() {
+  .hearth-typography-layer(
+    @hearth-global-typography-text-s-font-family,
+    @hearth-global-typography-text-s-font-weight,
+    @hearth-global-typography-text-s-line-height,
+    @hearth-global-typography-text-s-font-size,
+    @hearth-global-typography-text-s-letter-spacing,
+    @hearth-global-typography-text-s-paragraph-spacing
+  );
+}

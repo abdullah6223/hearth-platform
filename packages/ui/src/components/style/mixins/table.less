@@ -1,0 +1,28 @@
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/typography";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/table";
+
+.hearth-table {
+  text-align: left;
+  border: @hearth-global-border-width-default solid @hearth-global-color-gray-3;
+  border-radius: @hearth-global-border-radius-medium;
+  border-collapse: separate;
+  border-spacing: 0;
+
+  th {
+    padding: @hearth-global-spacing-20 @hearth-global-spacing-16;
+    color: @hearth-global-color-gray-7;
+    border-bottom: @hearth-global-border-width-default solid @hearth-global-color-gray-3;
+    .hearth-typography-h6();
+  }
+
+  td {
+    padding: @hearth-global-spacing-16;
+    border-bottom: @hearth-global-border-width-default solid @hearth-global-color-gray-3;
+    .hearth-typography-text-medium();
+  }
+
+  & > tbody > tr:last-child > td {
+    border-bottom: none;
+  }
+}

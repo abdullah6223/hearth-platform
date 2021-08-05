@@ -1,0 +1,315 @@
+@import (reference) "@open-hearth/ui/src/tokens/variables.less";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/typography";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/table";
+@import (reference) "@open-hearth/ui/src/components/style/mixins/link";
+
+.hearth-rich-content() {
+  .hearth-typography-text-large();
+
+  color: @hearth-global-color-gray-7;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 1.8em 0 0.8em;
+
+    &:first-child {
+      margin: 0 0 0.6em;
+    }
+  }
+
+  p {
+    margin: 0 0 @hearth-global-spacing-8;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  strong {
+    font-weight: 700;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  s,
+  del {
+    text-decoration: line-through;
+  }
+
+  a {
+    .hearth-link();
+  }
+
+  ul,
+  ol {
+    margin-bottom: 1.8em;
+    padding-left: @hearth-global-spacing-24;
+    color: @hearth-global-color-gray-7;
+    list-style-position: outside;
+
+    & ul,
+    & ol {
+      padding-left: @hearth-global-spacing-20;
+    }
+
+    & > li:not(:last-child),
+    & > li ul:not(:last-child),
+    & > li ol:not(:last-child) {
+      margin-bottom: 0.5em;
+    }
+
+    & > li ul:first-child,
+    & > li ol:first-child {
+      margin-top: 0.5em;
+    }
+
+    & li::marker {
+      .hearth-typography-text-large();
+    }
+  }
+
+  blockquote {
+    margin: 1em 0;
+    padding-left: 1em;
+    border-left: 0.25em solid @hearth-global-color-gray-5;
+
+    & > .hearth-typography {
+      padding: 0.5em 0;
+    }
+
+    & > blockquote:not(:first-child) {
+      margin-top: 0.5em;
+    }
+  }
+
+  table {
+    width: 100%;
+    .hearth-table();
+
+    td {
+      color: @hearth-global-color-black;
+    }
+  }
+
+  table:not(:last-child) {
+    margin-bottom: @hearth-global-spacing-24;
+  }
+
+  code {
+    padding: 2px 4px;
+    color: @hearth-global-color-black;
+    font-size: 14px;
+    font-family: "Noto Sans Mono", var(--hearth-font-fallback-mono);
+    line-height: 1.5;
+    background-color: @hearth-global-color-gray-1;
+    border-radius: @hearth-global-border-radius-small;
+  }
+
+  pre,
+  code {
+    direction: ltr;
+    text-align: left;
+    text-shadow: none;
+    word-break: normal;
+    word-spacing: normal;
+    tab-size: 4;
+    hyphens: none;
+  }
+
+  pre::selection,
+  code::selection {
+    text-shadow: none;
+  }
+
+  pre {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr @hearth-global-spacing-20;
+    margin: @hearth-global-spacing-24 0 @hearth-global-spacing-20;
+    padding: @hearth-global-spacing-16;
+    overflow: visible;
+    white-space: pre;
+    column-gap: @hearth-global-spacing-12;
+    background: @hearth-global-color-gray-1;
+    border-radius: @hearth-global-border-radius-large;
+
+    code {
+      padding: 0;
+      font-size: inherit;
+      background: none;
+      border-radius: 0;
+    }
+  }
+
+  pre[class*="language-"] {
+    padding: @hearth-global-spacing-20 @hearth-global-spacing-16;
+  }
+
+  pre > .hearth-tag {
+    position: absolute;
+    top: 0;
+    left: @hearth-global-spacing-16;
+    transform: translateY(-50%);
+  }
+
+  .code-container {
+    width: 100%;
+    overflow: auto;
+  }
+
+  .copy-text-icon {
+    cursor: pointer;
+  }
+
+  .namespace {
+    opacity: 0.7;
+  }
+
+  .token.comment,
+  .token.prolog,
+  .token.doctype,
+  .token.cdata,
+  .token.punctuation {
+    color: @hearth-global-color-gray-7;
+  }
+
+  .token.property,
+  .token.tag,
+  .token.boolean,
+  .token.number,
+  .token.constant,
+  .token.symbol,
+  .token.deleted {
+    color: @hearth-global-color-pink-5;
+  }
+
+  .token.selector,
+  .token.attr-name,
+  .token.string,
+  .token.char,
+  .token.builtin,
+  .token.inserted {
+    color: @hearth-global-color-cyan-7;
+  }
+
+  .token.operator,
+  .token.entity,
+  .token.url,
+  .language-css .token.string,
+  .style .token.string {
+    color: @hearth-global-color-brown-5;
+  }
+
+  .token.atrule,
+  .token.attr-value,
+  .token.keyword {
+    color: @hearth-global-color-blue-5;
+  }
+
+  .token.function {
+    color: @hearth-global-color-red-5;
+  }
+
+  .token.regex,
+  .token.important,
+  .token.variable {
+    color: @hearth-global-color-orange-5;
+  }
+
+  .token.important,
+  .token.bold {
+    font-weight: bold;
+  }
+
+  .token.italic {
+    font-style: italic;
+  }
+
+  .token.entity {
+    cursor: help;
+  }
+
+  .line-highlight {
+    position: absolute;
+    right: 0;
+    left: 0;
+    z-index: 0;
+    margin-top: 1em;
+    padding: inherit 0;
+    line-height: inherit;
+    white-space: pre;
+    background: @hearth-global-color-gray-3;
+    box-shadow: inset 5px 0 0 @hearth-global-color-gray-5;
+    pointer-events: none;
+  }
+
+  ul[data-type="taskList"] {
+    padding-left: 0;
+    list-style: none;
+
+    > .react-renderer:not(:last-child) {
+      margin-bottom: 0.5em;
+    }
+
+    li {
+      &::marker {
+        content: none;
+      }
+
+      > .hearth-rich-text-area-task-list-item {
+        display: flex;
+        gap: @hearth-global-spacing-8;
+        align-items: flex-start;
+      }
+
+      > .hearth-rich-text-area-task-list-item > span[contenteditable="false"] {
+        flex-shrink: 0;
+        line-height: 0;
+      }
+
+      > .hearth-rich-text-area-task-list-item > .hearth-typography {
+        flex: 1;
+        min-width: 0;
+      }
+
+      > .hearth-rich-text-area-task-list-item > .hearth-typography > ul[data-type="taskList"],
+      > .hearth-rich-text-area-task-list-item > .hearth-typography > ol[data-type="taskList"] {
+        margin-top: 0.5em;
+        margin-bottom: 0;
+        padding-left: @hearth-global-spacing-20;
+      }
+
+      > span[contenteditable="false"] {
+        flex-shrink: 0;
+        line-height: 0;
+      }
+
+      > div {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+  }
+
+  hr {
+    margin: @hearth-global-spacing-16 0;
+    border: none;
+    border-top: 1px solid @hearth-global-color-gray-3;
+  }
+}
+
+.hearth-rich-content-inline() {
+  color: @hearth-global-color-black;
+
+  ul,
+  ol {
+    color: @hearth-global-color-black;
+  }
+}
