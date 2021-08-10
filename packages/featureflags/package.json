@@ -1,0 +1,19 @@
+{
+  "name": "@open-hearth/featureflags",
+  "version": "1.0.0",
+  "dependencies": {
+    "@growthbook/growthbook": "^1.0.1",
+    "@growthbook/growthbook-react": "^1.0.1",
+    "@open-hearth/config": "workspace:^",
+    "@open-hearth/keystone": "workspace:^",
+    "@open-hearth/miniapp-utils": "workspace:^",
+    "@open-hearth/next": "workspace:^",
+    "express": "catalog:",
+    "lodash": "catalog:"
+  },
+  "peerDependencies": {
+    "next": ">=15",
+    "react": ">=18.3.1"
+  },
+  "repository": "https://github.com/abdullah6223/hearth-platform/tree/main/packages/featureflags"
+}
