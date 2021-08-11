@@ -1,0 +1,54 @@
+{
+  "name": "@open-hearth/files",
+  "version": "0.0.0-development",
+  "author": {
+    "name": "Abdullah",
+    "email": "abdullah.dev921@gmail.com",
+    "url": "https://github.com/abdullah6223"
+  },
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "rimraf dist && tsc"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "require": "./dist/client.js",
+      "import": "./dist/client.js"
+    },
+    "./server": "./server.js",
+    "./schema": "./schema/index.js",
+    "./schema/models": "./schema/models/index.js",
+    "./schema/utils/serverSchema": "./schema/utils/serverSchema.js",
+    "./schema/utils/testSchema": "./schema/utils/testSchema.js",
+    "./fileMiddleware": "./fileMiddleware.js",
+    "./fileMiddleware.test": "./fileMiddleware.test.js",
+    "./utils": "./utils.js",
+    "./utils.test": "./utils.test.js"
+  },
+  "dependencies": {
+    "@open-hearth/config": "workspace:^",
+    "@open-hearth/miniapp-utils": "workspace:^",
+    "express": "^4.21.2",
+    "file-type": "16.5.4",
+    "formidable": "^3.5.4",
+    "jsonwebtoken": "^9.0.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
+    "@open-hearth/tsconfig": "workspace:^",
+    "@types/jsonwebtoken": "^9.0.0",
+    "form-data": "^4.0.4",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3"
+  }
+}
