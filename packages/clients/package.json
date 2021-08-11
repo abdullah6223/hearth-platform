@@ -1,0 +1,24 @@
+{
+    "name": "@open-hearth/clients",
+    "main": "index.js",
+    "version": "1.0.0",
+    "description": "Clients for local and external services",
+    "keywords": [
+        "hearth",
+        "abdullah6223",
+        "clients"
+    ],
+    "dependencies": {
+        "@faker-js/faker": "catalog:",
+        "@open-hearth/config": "workspace:^",
+        "@open-hearth/keystone": "workspace:^",
+        "lodash": "catalog:",
+        "node-fetch": "^2.6.7"
+    },
+    "repository": "https://github.com/abdullah6223/hearth-platform/tree/main/packages/clients",
+    "author": {
+    "name": "Abdullah",
+    "email": "abdullah.dev921@gmail.com",
+    "url": "https://github.com/abdullah6223"
+  }
+}
