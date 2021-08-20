@@ -1,0 +1,12 @@
+{
+  "name": "@open-hearth/surveys",
+  "version": "1.0.0",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "peerDependencies": {
+    "posthog-js": ">=1.364.1",
+    "react": ">=18.3.1"
+  },
+  "repository": "https://github.com/abdullah6223/hearth-platform/tree/main/packages/surveys"
+}
