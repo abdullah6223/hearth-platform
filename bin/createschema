@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+
+const { createschema } = require('@open-hearth/codegen')
+createschema(process.argv)

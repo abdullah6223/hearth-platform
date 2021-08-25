@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+
+const { createservice } = require('@open-hearth/codegen')
+createservice(process.argv)
