@@ -1,0 +1,30 @@
+.green-button {
+  background: var(--hearth-global-color-green-7) !important;
+  border: none !important;
+}
+
+.green-button span {
+  color: var(--hearth-global-color-white) !important;
+  opacity: 1 !important;
+  fill: var(--hearth-global-color-white) !important;
+}
+
+.green-button span path {
+  color: var(--hearth-global-color-white) !important;
+  opacity: 1 !important;
+  fill: var(--hearth-global-color-white) !important;
+}
+
+.green-button::after {
+  opacity: 0 !important;
+}
+
+.green-button:hover {
+  background: var(--hearth-global-color-green-5) !important;
+  border: none !important;
+}
+
+.green-button:active {
+  background: var(--hearth-global-color-green-3) !important;
+  border: none !important;
+}
