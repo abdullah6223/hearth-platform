@@ -1,0 +1,85 @@
+import styled from '@emotion/styled'
+import get from 'lodash/get'
+import { useCallback, useMemo } from 'react'
+
+import { Download } from '@open-hearth/icons'
+import { useIntl } from '@open-hearth/next/intl'
+import { Button, Tooltip } from '@open-hearth/ui'
+import { colors } from '@open-hearth/ui/colors'
+
+import { getDateRender } from '@hearth/domains/common/components/Table/Renders'
+import { useDownloadFileFromServer } from '@hearth/domains/common/hooks/useDownloadFileFromServer'
+
+
+// TODO(HEARTH-8877): Move button to UI-kit
+const StyledButton = styled(Button)`
+  border: none;
+  padding: 8px;
+  min-width: auto;
+  height: auto;
+  
+  &::before, &:focus {
+    border: none;
+  }
+  
+  & > span {
+    color: ${colors.gray[7]};
+  }
+`
+
+export const usePropertyDocumentsTableColumns = () => {
+    const intl = useIntl()
+    const NameTitle = intl.formatMessage({ id: 'documents.propertyDocuments.columns.name' })
+    const DateTitle = intl.formatMessage({ id: 'documents.propertyDocuments.columns.date' })
+    const DownloadMessage = intl.formatMessage({ id: 'Download' })
+
+    const { downloadFile } = useDownloadFileFromServer()
+
+    const handleDownload = useCallback(async (event, document) => {
+        event.stopPropagation()
+
+        const url = get(document, 'file.publicUrl')
+        const name = get(document, 'file.originalFilename')
+
+        await downloadFile({ url, name })
+    }, [downloadFile])
+
+    const renderDownloadIcon = useCallback((document) => {
+        return (
+            <Tooltip title={DownloadMessage}>
+                <StyledButton
+                    type='secondary'
+                    icon={<Download size='medium' color='inherit' />}
+                    onClick={(event) => handleDownload(event, document)}
+                />
+            </Tooltip>
+        )
+    }, [DownloadMessage, handleDownload])
+
+    const renderDate = useMemo(() => getDateRender(intl), [intl])
+
+    return [
+        {
+            title: NameTitle,
+            ellipsis: true,
+            dataIndex: 'name',
+            key: 'name',
+            sorter: true,
+            width: '70%',
+        },
+        {
+            title: DateTitle,
+            ellipsis: true,
+            dataIndex: 'createdAt',
+            key: 'createdAt',
+            sorter: true,
+            render: renderDate,
+            width: '23%',
+        },
+        {
+            key: 'downloadButton',
+            render: renderDownloadIcon,
+            width: '7%',
+        },
+    ]
+}
