@@ -1,0 +1,19 @@
+query getOrganizationBillingRecipients($organization: OrganizationWhereInput!) {
+    recipients: allBillingRecipients(
+        where: {
+            context: {
+                organization: $organization
+                status: "Finished"
+            }
+        }
+        first: 100
+        sortBy: [createdAt_ASC]
+    ) {
+        id
+        bankAccount
+        bic
+        tin
+        category { id name }
+        addressKey
+    }
+}
