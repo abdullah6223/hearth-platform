@@ -1,0 +1,11 @@
+.page-wrapper :global(.hearth-tabs),
+.page-wrapper :global(.hearth-tabs-content),
+.page-wrapper :global(.hearth-tabs-tabpane),
+.page-wrapper :global(.page-content) {
+  height: 100%;
+}
+
+.page-wrapper :global(.hearth-tabs-nav),
+.page-wrapper :global(.hearth-tabs-nav-wrap) {
+  min-height: 48px;
+}

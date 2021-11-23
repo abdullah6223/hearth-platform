@@ -1,0 +1,11 @@
+.integration-parameters-list :global(.hearth-list-item .hearth-typography) {
+  max-width: 60%;
+}
+
+.recipient-details-list :global(.hearth-list-item:first-child > .hearth-typography:first-child) {
+  font-weight: 600;
+}
+
+.recipient-scroll-padding {
+  padding-right: 10px;
+}

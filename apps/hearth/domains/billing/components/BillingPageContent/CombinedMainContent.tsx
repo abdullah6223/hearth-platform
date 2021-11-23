@@ -1,0 +1,288 @@
+import { useGetB2BAppsWithBillingTabEmbeddingConfigQuery } from '@app/hearth/gql'
+import { AcquiringIntegrationContextDefaultStatusType as AcquiringContextStatusType } from '@app/hearth/schema'
+import get from 'lodash/get'
+import getConfig from 'next/config'
+import { useRouter } from 'next/router'
+import React, { useCallback, useEffect, useMemo } from 'react'
+
+import type { IFrameMetadata } from '@open-hearth/miniapp-utils/helpers/iframe'
+import { useIntl } from '@open-hearth/next/intl'
+import { useOrganization } from '@open-hearth/next/organization'
+import { Radio, Tabs } from '@open-hearth/ui'
+import type { TabItem } from '@open-hearth/ui'
+
+import { VIEW_TYPES, ViewTypes } from '@hearth/domains/acquiring/utils/clientSchema'
+import { AccrualsTab } from '@hearth/domains/billing/components/BillingPageContent/AccrualsTab'
+import { B2BAppBillingTab } from '@hearth/domains/billing/components/BillingPageContent/B2BAppBillingTab'
+import { useBillingAndAcquiringContexts } from '@hearth/domains/billing/components/BillingPageContent/ContextProvider'
+import { EmptyContent } from '@hearth/domains/billing/components/BillingPageContent/EmptyContent'
+import { PaymentsTab } from '@hearth/domains/billing/components/BillingPageContent/PaymentsTab'
+import { SetupTab } from '@hearth/domains/billing/components/BillingPageContent/SetupTab'
+import { ACCRUALS_TAB_KEY, CONTEXT_FINISHED_STATUS, EXTENSION_TAB_KEY, PAYMENTS_TAB_KEY, SETUP_TAB_KEY } from '@hearth/domains/billing/constants/constants'
+import { DEFAULT_COMBINED_VIEW_TYPES, useCombinedViewAvailability } from '@hearth/domains/billing/hooks/useCombinedViewAvailability'
+import { updateQuery } from '@hearth/domains/common/utils/helpers'
+import { parseQuery } from '@hearth/domains/common/utils/tables.utils'
+import { B2BAppFrame } from '@hearth/domains/miniapp/components/B2BAppFrame'
+
+import type { BillingIntegrationOrganizationContext } from '@app/hearth/schema'
+
+
+const { publicRuntimeConfig: { registryUploadIntegrationId, sppConfig } } = getConfig()
+// TODO: HEARTH-13420 remove one integration when we merge them into one
+const accrualsRegistryIntegrationIds = [registryUploadIntegrationId, sppConfig?.BillingIntegrationId]
+    .filter(Boolean)
+const REGISTRY_IMPORTER_IFRAME_METADATA: IFrameMetadata = {
+    domainsMapping: [],
+    permissions: {
+        isClipboardWriteAllowed: true,
+    },
+}
+
+type ExtensionTabType = {
+    id: string
+    appUrl: string
+    label: string
+    integrationId?: string | null
+    shortDescription?: string | null
+    isB2BApp?: boolean
+}
+
+type RegistryIframeProps = {
+    appUrl?: string
+    shortDescription?: string | null
+    isB2BApp?: boolean
+    appId?: string
+    metadata?: IFrameMetadata
+}
+
+function buildBillingAppFromContext (context: BillingIntegrationOrganizationContext): ExtensionTabType {
+    return {
+        id: context.id,
+        label: get(context, ['integration', 'billingPageTitle']) || get(context, ['integration', 'name'], ''),
+        integrationId: get(context, ['integration', 'id'], null),
+        appUrl: get(context, ['integration', 'appUrl'], '') || '',
+    }
+}
+
+const IframeTab: React.FC<RegistryIframeProps> = ({ appUrl, shortDescription, isB2BApp, appId, metadata }) => {
+    if (!appUrl) return <EmptyContent />
+
+    if (isB2BApp && appId) {
+        return <B2BAppBillingTab appId={appId} appUrl={appUrl} shortDescription={shortDescription} />
+    }
+
+    return <B2BAppFrame src={appUrl} actions={true} metadata={metadata} />
+}
+
+export const CombinedViewSwitch: React.FC<{ activeTab: string, availableTypes: ViewTypes[] }> = ({ activeTab, availableTypes }) => {
+    const intl = useIntl()
+    const PaymentsTypeListTitle = intl.formatMessage({ id: 'accrualsAndPayments.payments.type.list' })
+    const PaymentsTypeRegistryTitle = intl.formatMessage({ id: 'accrualsAndPayments.payments.type.registry' })
+
+    const router = useRouter()
+    const { type } = parseQuery(router.query)
+    const activeType = availableTypes.includes(type as ViewTypes) ? type : availableTypes[0]
+
+    const handleRadioChange = useCallback(async (event) => {
+        await updateQuery(
+            router,
+            { newParameters: { type: event.target.value, tab: activeTab } },
+            { resetOldParameters: true, routerAction: 'replace', shallow: true }
+        )
+    }, [activeTab, router])
+
+    return (
+        <Radio.Group optionType='button' value={activeType} onChange={handleRadioChange}>
+            {availableTypes.includes(VIEW_TYPES.registry) && (
+                <Radio
+                    key={VIEW_TYPES.registry}
+                    value={VIEW_TYPES.registry}
+                    label={PaymentsTypeRegistryTitle}
+                />
+            )}
+            {availableTypes.includes(VIEW_TYPES.list) && (
+                <Radio
+                    key={VIEW_TYPES.list}
+                    value={VIEW_TYPES.list}
+                    label={PaymentsTypeListTitle}
+                />
+            )}
+        </Radio.Group>
+    )
+}
+
+export const CombinedMainContent: React.FC = () => {
+    const intl = useIntl()
+    const PaymentsTabTitle = intl.formatMessage({ id: 'Payments' })
+    const AccrualsTabTitle = intl.formatMessage({ id: 'Accruals' })
+    const AccrualsSetupTabTitle = intl.formatMessage({ id: 'pages.billing.setup.paymentsAndAccruals.title' })
+
+    const userOrganization = useOrganization()
+    const canReadBillingReceipts = userOrganization?.role?.canReadBillingReceipts || false
+    const canReadPayments = userOrganization?.role?.canReadPayments || false
+    const canManageIntegrations = userOrganization?.role?.canManageIntegrations || false
+
+    const router = useRouter()
+    const { tab, type } = parseQuery(router.query)
+    const { billingContexts, acquiringContexts } = useBillingAndAcquiringContexts()
+    const hasLastReport = billingContexts.some(({ lastReport }) => !!lastReport)
+    const activeBillingContexts = useMemo(() => {
+        return billingContexts.filter(({ status }) => status === CONTEXT_FINISHED_STATUS)
+    }, [billingContexts])
+
+    const inactiveAcquiringContexts = useMemo(() => {
+        return acquiringContexts.filter(({ status }) => status !== CONTEXT_FINISHED_STATUS)
+    }, [acquiringContexts])
+    const activeAcquiringContexts = useMemo(() => {
+        return acquiringContexts.filter(({ status }) => status === AcquiringContextStatusType.Finished || status === AcquiringContextStatusType.Verification)
+    }, [acquiringContexts])
+
+    const isSetupCompleted = useMemo(() => {
+        return activeBillingContexts.length > 0 && inactiveAcquiringContexts.length === 0 && activeAcquiringContexts.length > 0
+    }, [activeAcquiringContexts, activeBillingContexts, inactiveAcquiringContexts.length])
+
+    const billingIntegrationsExtensionTabs: ExtensionTabType[] = useMemo(() => {
+        return activeBillingContexts
+            .filter(({ integration }) => !!integration?.appUrl && !!integration?.extendsBillingPage)
+            .map(buildBillingAppFromContext)
+    }, [activeBillingContexts])
+
+    const { data } = useGetB2BAppsWithBillingTabEmbeddingConfigQuery()
+    const b2bAppsExtensionTabs: ExtensionTabType[] = useMemo(() => {
+        if (!data?.b2bApps) return []
+        return data.b2bApps.filter(Boolean).map((b2bApp) => ({
+            id: b2bApp.id,
+            label: b2bApp.name || '',
+            appUrl: b2bApp?.billingEmbeddingConfig?.tabUrl || '',
+            shortDescription: b2bApp?.shortDescription,
+            isB2BApp: true,
+        }))
+    }, [data?.b2bApps])
+
+    const extensionAppTabs = useMemo(() => [
+        ...billingIntegrationsExtensionTabs.filter(({ integrationId }) => !accrualsRegistryIntegrationIds.includes(integrationId)),
+        ...b2bAppsExtensionTabs,
+    ].filter(({ appUrl }) => !!appUrl), [b2bAppsExtensionTabs, billingIntegrationsExtensionTabs])
+    const extensionTabKeys = useMemo(() => extensionAppTabs.map(({ id }) => `${EXTENSION_TAB_KEY}-${id}`), [extensionAppTabs])
+
+    const availableTabs = useMemo(() => [
+        !isSetupCompleted && canManageIntegrations && SETUP_TAB_KEY,
+        canReadPayments && isSetupCompleted && PAYMENTS_TAB_KEY,
+        canReadBillingReceipts && isSetupCompleted &&  ACCRUALS_TAB_KEY,
+        ...extensionTabKeys,
+    ].filter(Boolean), [canManageIntegrations, canReadBillingReceipts, canReadPayments, extensionTabKeys, isSetupCompleted])
+    const activeTab = useMemo(() => availableTabs.includes(tab) ? tab : availableTabs[0], [availableTabs, tab])
+
+    const {
+        availableTypesByTab,
+        availableTypesForActiveTab,
+        activeType,
+    } = useCombinedViewAvailability({
+        activeTab,
+        type,
+        billingContexts,
+        acquiringContexts,
+    })
+
+    const registryUploadContext = useMemo(() => (
+        activeBillingContexts
+            .find(({ integration }) => Boolean(integration?.appUrl && accrualsRegistryIntegrationIds.includes(integration.id)))
+    ), [activeBillingContexts])
+
+    const registryUploadApp = useMemo(() => {
+        if (!registryUploadContext) return null
+
+        return buildBillingAppFromContext(registryUploadContext)
+    }, [registryUploadContext])
+    const isExtensionTabActive = extensionTabKeys.includes(activeTab)
+
+    useEffect(() => {
+        if (isExtensionTabActive) return
+        if (!type || type !== activeType) {
+            updateQuery(
+                router,
+                { newParameters: { tab: activeTab, type: activeType } },
+                { resetOldParameters: true, routerAction: 'replace', shallow: true }
+            )
+        }
+    }, [activeTab, activeType, isExtensionTabActive, router, type])
+
+    const handleTabChange = useCallback(async (activeTab) => {
+        const nextAvailableTypes = availableTypesByTab[activeTab] || DEFAULT_COMBINED_VIEW_TYPES
+        const nextType = nextAvailableTypes.includes(type as ViewTypes) ? type : nextAvailableTypes[0]
+
+        await updateQuery(
+            router,
+            { newParameters: { tab: activeTab, type: nextType } },
+            { resetOldParameters: true, routerAction: 'replace', shallow: true }
+        )
+    }, [availableTypesByTab, router, type])
+
+    const accrualsTabContent = useMemo(() => {
+        if (activeType === VIEW_TYPES.registry) {
+            return (
+                <IframeTab
+                    appUrl={registryUploadApp?.appUrl}
+                    appId={registryUploadApp?.id}
+                    shortDescription={registryUploadApp?.shortDescription}
+                    isB2BApp={registryUploadApp?.isB2BApp}
+                    metadata={REGISTRY_IMPORTER_IFRAME_METADATA}
+                />
+            )
+        }
+
+        return hasLastReport ? <AccrualsTab /> : <EmptyContent />
+    }, [activeType, hasLastReport, registryUploadApp])
+
+    const items = useMemo<Array<TabItem>>(() => {
+        const result: Array<TabItem> = [
+            canManageIntegrations && !isSetupCompleted && {
+                label: AccrualsSetupTabTitle,
+                key: SETUP_TAB_KEY,
+                children:  <SetupTab acquiringContexts={acquiringContexts}/>,
+            },
+            canReadPayments && isSetupCompleted && {
+                label: PaymentsTabTitle,
+                key: PAYMENTS_TAB_KEY,
+                children: <PaymentsTab type={activeType as ViewTypes} />,
+            },
+            canReadBillingReceipts && isSetupCompleted && {
+                label: AccrualsTabTitle,
+                key: ACCRUALS_TAB_KEY,
+                children: accrualsTabContent,
+            },
+        ].filter(Boolean) as Array<TabItem>
+
+        extensionAppTabs.forEach(({ appUrl, id, label, shortDescription, isB2BApp }) => {
+            if (!appUrl) return
+
+            result.push({
+                label,
+                key: `${EXTENSION_TAB_KEY}-${id}`,
+                children: (
+                    <IframeTab
+                        appUrl={appUrl}
+                        appId={id}
+                        shortDescription={shortDescription}
+                        isB2BApp={isB2BApp}
+                    />
+                ),
+            })
+        })
+
+        return result
+    }, [AccrualsSetupTabTitle, AccrualsTabTitle, PaymentsTabTitle, accrualsTabContent, acquiringContexts, activeType, canManageIntegrations, canReadBillingReceipts, canReadPayments, extensionAppTabs, isSetupCompleted])
+
+    return (
+        <Tabs
+            id='combined-billing-tabs'
+            activeKey={activeTab}
+            onChange={handleTabChange}
+            items={items}
+            destroyInactiveTabPane
+            tabBarExtraContent={!isExtensionTabActive && availableTypesForActiveTab.length > 1 && activeBillingContexts.length > 0 && (
+                <CombinedViewSwitch activeTab={activeTab} availableTypes={availableTypesForActiveTab} />
+            )}
+        />
+    )
+}
