@@ -1,0 +1,20 @@
+.banner-wrapper :global(.hearth-promo-block) {
+  position: relative;
+}
+
+.banner-wrapper :global(.hearth-promo-block-image-container) {
+  position: absolute;
+  right: 50px;
+  bottom: 0;
+  width: auto;
+  height: auto;
+}
+
+.banner-wrapper :global(.hearth-promo-block-image-container > img) {
+  width: 365px;
+  height: auto;
+}
+
+.banner-wrapper :global(.hearth-promo-block-text-container > .hearth-typography-ellipsis-multiple-line:last-child) {
+  -webkit-line-clamp: 3 !important;
+}

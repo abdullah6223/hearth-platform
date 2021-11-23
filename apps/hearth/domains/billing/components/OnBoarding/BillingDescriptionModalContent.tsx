@@ -1,0 +1,105 @@
+import { Col, Row } from 'antd'
+import React, { useCallback } from 'react'
+
+import { useIntl } from '@open-hearth/next/intl'
+import { Banner, Markdown, Space, Typography, Button } from '@open-hearth/ui'
+
+import { INTEGRATION_TYPE_B2B_APP, INTEGRATION_TYPE_BILLING } from '@hearth/domains/billing/constants/constants'
+import { useIntegrationContext } from '@hearth/domains/billing/hooks/useIntegrationContext'
+import { useContainerSize } from '@hearth/domains/common/hooks/useContainerSize'
+import { PROMO_BLOCK_TEXT_VARIANTS_TO_PROPS } from '@hearth/domains/miniapp/constants'
+
+import styles from './BillingDescriptionModalContent.module.css'
+
+import type { RowProps } from 'antd'
+
+const DEFAULT_BANNER_IMAGE_PATH = '/billing/banner.webp'
+
+
+type BillingDescriptionModalContentProps = {
+    id: string
+    name: string
+    targetDescription: string
+    detailedDescription: string
+    bannerColor: string
+    bannerTextColor: string
+    bannerPromoImageUrl?: string
+    receiptsLoadingTime?: string
+    servicePrice?: string
+    integrationType: typeof INTEGRATION_TYPE_BILLING | typeof INTEGRATION_TYPE_B2B_APP
+    setupButtonLabel?: string
+    onCompleted?: () => void
+    noSetupButton?: boolean
+}
+
+const MODAL_PIC_GAP: RowProps['gutter'] = [40, 40]
+const FULL_SPAN = 24
+const SETUP_BUTTON_GAP = 24
+const MODAL_COL_BREAKPOINT = 700
+
+export const BillingDescriptionModalContent: React.FC<BillingDescriptionModalContentProps> = ({
+    id,
+    name,
+    targetDescription,
+    detailedDescription,
+    bannerColor,
+    bannerTextColor,
+    bannerPromoImageUrl,
+    receiptsLoadingTime,
+    integrationType,
+    setupButtonLabel,
+    servicePrice,
+    noSetupButton,
+    onCompleted,
+}) => {
+    const intl = useIntl()
+    const ReceiptsAwaitingTitle = intl.formatMessage({ id: 'accrualsAndPayments.billingModal.receiptAwaitingTime' })
+    const ServicePriceTitle = intl.formatMessage({ id: 'accrualsAndPayments.billingModal.price' })
+    const SetupButtonLabel = intl.formatMessage({ id: 'accrualsAndPayments.billingModal.setupButtonLabel' })
+    
+    const [{ width }, setRef] = useContainerSize<HTMLDivElement>()
+
+    const { loading, handleSetupClick } = useIntegrationContext({ integrationType, integrationId: id })
+    const isBilling = integrationType === INTEGRATION_TYPE_BILLING
+    const cols = width >= MODAL_COL_BREAKPOINT ? 2 : 1
+    const handleSetup = useCallback(async () => {
+        await handleSetupClick()
+        onCompleted?.()
+    }, [handleSetupClick, onCompleted])
+
+    return (
+        <Row gutter={MODAL_PIC_GAP} ref={setRef}>
+            <Col span={FULL_SPAN}>
+                <div className={styles['banner-wrapper']}>
+                    <Banner
+                        title={name}
+                        subtitle={targetDescription}
+                        backgroundColor={bannerColor}
+                        imgUrl={bannerPromoImageUrl || DEFAULT_BANNER_IMAGE_PATH }
+                        {...PROMO_BLOCK_TEXT_VARIANTS_TO_PROPS[bannerTextColor]}
+                    />
+                </div>
+            </Col>
+            <Col span={FULL_SPAN / cols}>
+                <Markdown>
+                    {detailedDescription}
+                </Markdown>
+            </Col>
+            <Col span={FULL_SPAN / cols}>
+                <Space size={SETUP_BUTTON_GAP} direction='vertical' width='100%'>
+                    {((isBilling && receiptsLoadingTime) || (!isBilling && servicePrice )) && (
+                        <div>
+                            <Typography.Title level={4}>{isBilling ? ReceiptsAwaitingTitle : ServicePriceTitle}</Typography.Title>
+                            <Typography.Text type='secondary'>{isBilling ? receiptsLoadingTime : servicePrice}</Typography.Text>
+                        </div>
+                    )}
+                    { noSetupButton ? null :
+                        <Button type='primary' onClick={handleSetup} disabled={loading}>
+                            {setupButtonLabel || SetupButtonLabel}
+                        </Button>
+                    }
+                </Space>
+            </Col>
+        </Row>
+    )
+}
