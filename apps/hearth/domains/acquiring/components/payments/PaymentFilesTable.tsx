@@ -1,0 +1,323 @@
+import { GetPaymentsFilesQuery, useGetPaymentsFilesQuery } from '@app/hearth/gql'
+import { SortPaymentsFilesBy } from '@app/hearth/schema'
+import { Col, Row } from 'antd'
+import { CheckboxChangeEvent } from 'antd/lib/checkbox/Checkbox'
+import { Gutter } from 'antd/lib/grid/row'
+import { TableRowSelection } from 'antd/lib/table/interface'
+import dayjs, { Dayjs } from 'dayjs'
+import debounce from 'lodash/debounce'
+import getConfig from 'next/config'
+import { NextRouter, useRouter } from 'next/router'
+import React, { CSSProperties, useCallback, useMemo, useState } from 'react'
+
+import { useCachePersistor } from '@open-hearth/apollo'
+import { Download } from '@open-hearth/icons'
+import { useIntl } from '@open-hearth/next/intl'
+import { useOrganization } from '@open-hearth/next/organization'
+import { ActionBar, Button, Checkbox, Space } from '@open-hearth/ui'
+
+import { PaymentsFileDetailsModal } from '@hearth/domains/acquiring/components/payments/PaymentsFileDetailsModal'
+import { PaymentsSummary } from '@hearth/domains/acquiring/components/payments/PaymentsSummary'
+import { PaymentsTableFilterBar } from '@hearth/domains/acquiring/components/payments/PaymentsTableFilterBar'
+import useDownloadPaymentsFiles from '@hearth/domains/acquiring/hooks/useDownloadPaymentsFiles'
+import { usePaymentsFilesTableColumns } from '@hearth/domains/acquiring/hooks/usePaymentsFilesTableColumns'
+import { usePaymentsFilesTableFilters } from '@hearth/domains/acquiring/hooks/usePaymentsFilesTableFilters'
+import usePaymentsSum from '@hearth/domains/acquiring/hooks/usePaymentsSum'
+import { PaymentsFilterTemplate } from '@hearth/domains/acquiring/utils/clientSchema'
+import { getInitialSelectedRegistryKeys, IPaymentsFilesFilters } from '@hearth/domains/acquiring/utils/helpers'
+import { useBillingAndAcquiringContexts } from '@hearth/domains/billing/components/BillingPageContent/ContextProvider'
+import { DEFAULT_PAGE_SIZE, Table } from '@hearth/domains/common/components/Table/Index'
+import { getMoneyRender } from '@hearth/domains/common/components/Table/Renders'
+import { useDateRangeSearch } from '@hearth/domains/common/hooks/useDateRangeSearch'
+import {
+    MultipleFilterContextProvider,
+    useMultipleFiltersModal,
+} from '@hearth/domains/common/hooks/useMultipleFiltersModal'
+import { useQueryMappers } from '@hearth/domains/common/hooks/useQueryMappers'
+import { useSearch } from '@hearth/domains/common/hooks/useSearch'
+import { updateQuery } from '@hearth/domains/common/utils/helpers'
+import { getPageIndexFromOffset, parseQuery } from '@hearth/domains/common/utils/tables.utils'
+
+
+const SORTABLE_PROPERTIES = ['amount', 'loadedAt']
+const PAYMENTS_DEFAULT_SORT_BY = ['loadedAt_DESC']
+const DEFAULT_DATE_RANGE: [Dayjs, Dayjs] = [dayjs().subtract(1, 'week'), dayjs()]
+const DEBOUNCE_TIMEOUT = 400
+
+const ROW_GUTTER: [Gutter, Gutter] = [0, 24]
+const BOTTOM_PADDING_LIKE_ACTION_BAR: CSSProperties = { paddingBottom: '104px' }
+
+const { publicRuntimeConfig: { defaultCurrencyCode } } = getConfig()
+
+type IPaymentsFile = NonNullable<NonNullable<GetPaymentsFilesQuery['paymentsFiles']>[number]>
+
+
+const PaymentFilesTableContent: React.FC = (): JSX.Element => {
+    const intl = useIntl()
+    const SearchPlaceholder = intl.formatMessage({ id: 'filters.FullSearch' })
+    const StartDateMessage = intl.formatMessage({ id: 'pages.hearth.meter.StartDate' })
+    const EndDateMessage = intl.formatMessage({ id: 'pages.hearth.meter.EndDate' })
+    const TotalsSumTitle = intl.formatMessage({ id: 'pages.hearth.payments.TotalSum' })
+    const PaymentsCountTitle = intl.formatMessage({ id: 'pages.hearth.payments.summary.count' })
+    const CancelSelectedRegistryMessage = intl.formatMessage({ id: 'global.cancelSelection' })
+    const DownloadRegistriesMessage = intl.formatMessage({ id: 'Download' })
+
+    const { acquiringContexts, billingContexts } = useBillingAndAcquiringContexts()
+    const { persistor } = useCachePersistor()
+
+    const router = useRouter()
+    const userOrganization = useOrganization()
+    const organizationId = userOrganization?.organization?.id ?? ''
+
+    const { filters, sorters, offset } = parseQuery(router.query)
+
+    const currencyCode = billingContexts.find(({ integration }) => !!integration.currencyCode)?.integration?.currencyCode ?? defaultCurrencyCode
+
+    const tableColumns = usePaymentsFilesTableColumns(currencyCode, { acquiringContexts })
+    const queryMetas = usePaymentsFilesTableFilters(organizationId)
+    const [isFilesDownloading, setIsFilesDownloading] = useState(false)
+    const [openedPaymentsFileId, setOpenedPaymentsFileId] = useState<string | null>(null)
+    const [selectedRegistryKeys, setSelectedRegistryKeys] = useState<string[]>(() => getInitialSelectedRegistryKeys(router))
+    const CountSelectedRegistryMessage = intl.formatMessage({ id: 'ItemsSelectedCount' }, { count: selectedRegistryKeys.length })
+
+    const currentPageIndex = getPageIndexFromOffset(offset, DEFAULT_PAGE_SIZE)
+    const { filtersToWhere, sortersToSortBy } = useQueryMappers(queryMetas, SORTABLE_PROPERTIES)
+
+    const [filtersAreReset, setFiltersAreReset] = useState(false)
+    const dateFallback = filtersAreReset ? null : DEFAULT_DATE_RANGE
+    const [dateRange, setDateRange] = useDateRangeSearch('loadedAt')
+    const dateFilterValue = dateRange || dateFallback
+    const dateFilter = dateFilterValue ? dateFilterValue.map(el => el.toISOString()) : null
+
+    const searchPaymentsFilesQuery: Record<string, unknown> = {
+        ...filtersToWhere({ loadedAt: dateFilter, ...filters }),
+        context: { id_in: acquiringContexts.map(({ id }) => id) },
+    }
+    const sortBy = sortersToSortBy(sorters, PAYMENTS_DEFAULT_SORT_BY)
+
+    const {
+        data,
+        loading,
+        refetch,
+    } = useGetPaymentsFilesQuery({
+        variables: {
+            where: searchPaymentsFilesQuery,
+            sortBy: sortBy as SortPaymentsFilesBy[],
+            first: DEFAULT_PAGE_SIZE,
+            skip: (currentPageIndex - 1) * DEFAULT_PAGE_SIZE,
+        },
+        skip: !acquiringContexts.length || !persistor,
+        fetchPolicy: 'network-only', // TODO: remove when sorters work with cache
+    })
+
+    const paymentsFiles = useMemo(() => data?.paymentsFiles?.filter(Boolean) || [], [data?.paymentsFiles])
+    const total = useMemo(() => data?.meta?.count, [data?.meta?.count])
+    const openedPaymentsFile = useMemo(() => paymentsFiles.find(({ id }) => id === openedPaymentsFileId) || null, [openedPaymentsFileId, paymentsFiles])
+
+    const { downloadPaymentsFiles } = useDownloadPaymentsFiles(refetch)
+    const selectedRowKeysByPage = useMemo(() => {
+        return paymentsFiles?.filter(file => selectedRegistryKeys.includes(file.id)).map(file => file.id) || []
+    }, [selectedRegistryKeys, paymentsFiles])
+
+    const { data: sumAllPayments, loading: sumAllPaymentsLoading } = usePaymentsSum({ paymentsFilesWhere: searchPaymentsFilesQuery })
+
+    const [search, handleSearchChange, handleResetSearch] = useSearch<IPaymentsFilesFilters>()
+    const handleDateChange = useCallback((value) => {
+        if (!value) {
+            setFiltersAreReset(true)
+        }
+        setDateRange(value)
+    }, [setDateRange])
+
+    const onReset = useCallback(() => {
+        setFiltersAreReset(true)
+        handleResetSearch()
+    }, [handleResetSearch])
+
+    const {
+        MultipleFiltersModal,
+        ResetFiltersModalButton,
+        OpenFiltersButton,
+        appliedFiltersCount,
+    } = useMultipleFiltersModal({
+        filterMetas: queryMetas,
+        filtersSchemaGql: PaymentsFilterTemplate,
+        onReset,
+        extraQueryParameters: { tab: 'payments', type: 'registry' },
+    })
+
+    const handleResetSelectedRegistry = useCallback(() => {
+        setSelectedRegistryKeys([])
+    }, [])
+
+    const handleClosePaymentsFileModal = useCallback(() => {
+        setOpenedPaymentsFileId(null)
+    }, [])
+
+    const handleDownloadPaymentsFile = useCallback(async (fileId: string) => {
+        await downloadPaymentsFiles([fileId])
+    }, [downloadPaymentsFiles])
+
+    const handleDownloadClick = async () => {
+        setIsFilesDownloading(true)
+        await downloadPaymentsFiles(selectedRegistryKeys)
+        setSelectedRegistryKeys([])
+        changeQuery(router, [])
+        setIsFilesDownloading(false)
+    }
+
+    const changeQuery = useMemo(() => debounce(async (router: NextRouter, selectedRegistryKeys: string[]) => {
+        await updateQuery(router, { newParameters: { selectedRegistryIds: selectedRegistryKeys } }, {
+            routerAction: 'replace',
+            resetOldParameters: false,
+            shallow: true,
+        })
+    }, DEBOUNCE_TIMEOUT), [])
+
+    const updateSelectedRegistryKeys = useCallback((selectedRegistryKeys: string[]) => {
+        setSelectedRegistryKeys(selectedRegistryKeys)
+        changeQuery(router, selectedRegistryKeys)
+    }, [changeQuery, router])
+
+    const isSelectedAllRowsByPage = !loading && selectedRowKeysByPage.length > 0 && selectedRowKeysByPage.length === paymentsFiles.length
+    const isSelectedSomeRowsByPage = !loading && selectedRowKeysByPage.length > 0 && selectedRowKeysByPage.length < paymentsFiles.length
+
+    const handleSelectAllRowsByPage = useCallback((e: CheckboxChangeEvent) => {
+        const checked = e.target.checked
+        if (checked) {
+            const newSelectedRegistryKeys = paymentsFiles
+                ?.filter(file => !selectedRowKeysByPage.includes(file.id))
+                .map(file => file.id)
+            updateSelectedRegistryKeys([...selectedRegistryKeys, ...newSelectedRegistryKeys])
+        } else {
+            updateSelectedRegistryKeys(selectedRegistryKeys.filter(key => !selectedRowKeysByPage.includes(key)))
+        }
+    }, [updateSelectedRegistryKeys, selectedRegistryKeys, selectedRowKeysByPage, paymentsFiles])
+
+    const handleSelectRow: (record: IPaymentsFile, checked: boolean) => void = useCallback((record, checked) => {
+        const selectedKey = record.id
+        if (checked) {
+            updateSelectedRegistryKeys([...selectedRegistryKeys, selectedKey])
+        } else {
+            updateSelectedRegistryKeys(selectedRegistryKeys.filter(key => selectedKey !== key))
+        }
+    }, [selectedRegistryKeys, updateSelectedRegistryKeys])
+
+    const handlePaymentsFileRowClick = useCallback((record: IPaymentsFile) => ({
+        onKeyDown: (event) => {
+            if (event.key !== 'Enter' && event.key !== ' ') return
+            if (event.target !== event.currentTarget) return
+
+            event.preventDefault()
+            setOpenedPaymentsFileId(record.id)
+        },
+        onClick: (event) => {
+            const selection = window.getSelection()
+            if (selection && selection.type === 'Range') return
+
+            const targetColumn = (event.target as HTMLElement).closest('td')
+            if (targetColumn?.cellIndex === 0) return
+
+            setOpenedPaymentsFileId(record.id)
+        },
+        tabIndex: 0,
+    }), [])
+
+    const rowSelection: TableRowSelection<IPaymentsFile> = useMemo(() => ({
+        selectedRowKeys: selectedRowKeysByPage,
+        fixed: true,
+        onSelect: handleSelectRow,
+        columnTitle: (
+            <Checkbox
+                checked={isSelectedAllRowsByPage}
+                indeterminate={isSelectedSomeRowsByPage}
+                onChange={handleSelectAllRowsByPage}
+            />
+        ),
+    }), [handleSelectAllRowsByPage, handleSelectRow, isSelectedAllRowsByPage, isSelectedSomeRowsByPage, selectedRowKeysByPage])
+
+    const paymentsSummaryItems = useMemo(() => ([
+        {
+            key: 'total',
+            label: TotalsSumTitle,
+            value: getMoneyRender(intl, currencyCode)(sumAllPayments?.result?.sum),
+            loading: sumAllPaymentsLoading,
+        },
+        {
+            key: 'count',
+            label: PaymentsCountTitle,
+            value: sumAllPayments?.result?.paymentsCount ?? 0,
+            loading: sumAllPaymentsLoading,
+        },
+    ]), [PaymentsCountTitle, TotalsSumTitle, currencyCode, intl, sumAllPayments?.result?.paymentsCount, sumAllPayments?.result?.sum, sumAllPaymentsLoading])
+
+
+    return (
+        <Row gutter={ROW_GUTTER} align='middle' justify='center'>
+            <PaymentsTableFilterBar
+                search={{ value: search, placeholder: SearchPlaceholder, onChange: handleSearchChange }}
+                datePickerProps={{ value: dateRange || dateFallback, onChange: handleDateChange, placeholder: [StartDateMessage, EndDateMessage] }}
+                modalFilters={{ count: appliedFiltersCount, resetButton: <ResetFiltersModalButton />, openButton: <OpenFiltersButton showLabel={false} /> }}
+            />
+
+
+            <Col span={24}>
+                <Space size={8} direction='vertical'>
+                    <PaymentsSummary items={paymentsSummaryItems} />
+                    <Table
+                        loading={loading}
+                        dataSource={paymentsFiles}
+                        totalRows={total}
+                        columns={tableColumns}
+                        rowSelection={rowSelection}
+                        onRow={handlePaymentsFileRowClick}
+                    />
+                </Space>
+            </Col>
+            <Col span={24}>
+                {!loading && total > 0 && selectedRegistryKeys.length > 0 && (
+                    <ActionBar
+                        message={CountSelectedRegistryMessage}
+                        actions={[
+                            <Button
+                                key='create'
+                                type='primary'
+                                loading={isFilesDownloading}
+                                icon={<Download size='medium' />}
+                                onClick={handleDownloadClick}
+                            >
+                                {DownloadRegistriesMessage}
+                            </Button>,
+                            <Button
+                                key='cancelPaymentsFileSelection'
+                                type='secondary'
+                                children={CancelSelectedRegistryMessage}
+                                onClick={handleResetSelectedRegistry}
+                                loading={isFilesDownloading}
+                            />,
+                        ]}
+                    />
+                )}
+            </Col>
+            <Col style={BOTTOM_PADDING_LIKE_ACTION_BAR}></Col>
+            <PaymentsFileDetailsModal
+                open={Boolean(openedPaymentsFile)}
+                onClose={handleClosePaymentsFileModal}
+                onDownload={handleDownloadPaymentsFile}
+                paymentsFile={openedPaymentsFile}
+                currency={currencyCode}
+            />
+            <MultipleFiltersModal />
+        </Row>
+    )
+}
+
+const PaymentFilesTable = () => {
+    return (
+        <MultipleFilterContextProvider>
+            <PaymentFilesTableContent />
+        </MultipleFilterContextProvider>
+    )
+}
+
+export default PaymentFilesTable

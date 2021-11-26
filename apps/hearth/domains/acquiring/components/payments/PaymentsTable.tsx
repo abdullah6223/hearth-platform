@@ -1,0 +1,312 @@
+import { PaymentStatusType, SortPaymentsBy } from '@app/hearth/schema'
+import { Col, Row } from 'antd'
+import { Gutter } from 'antd/lib/grid/row'
+import dayjs, { Dayjs } from 'dayjs'
+import get from 'lodash/get'
+import getConfig from 'next/config'
+import { useRouter } from 'next/router'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+
+import { useIntl } from '@open-hearth/next/intl'
+import { useOrganization } from '@open-hearth/next/organization'
+import { Modal, Typography, Button, Tour, Space } from '@open-hearth/ui'
+import { colors } from '@open-hearth/ui/colors'
+
+import { PaymentsSummary } from '@hearth/domains/acquiring/components/payments/PaymentsSummary'
+import styles from '@hearth/domains/acquiring/components/payments/PaymentsTable.module.css'
+import { PaymentsTableFilterBar } from '@hearth/domains/acquiring/components/payments/PaymentsTableFilterBar'
+import { PAYMENT_DONE_STATUS, PAYMENT_WITHDRAWN_STATUS } from '@hearth/domains/acquiring/constants/payment'
+import { EXPORT_PAYMENTS_TO_EXCEL } from '@hearth/domains/acquiring/gql'
+import usePaymentsSum from '@hearth/domains/acquiring/hooks/usePaymentsSum'
+import { usePaymentsTableColumns } from '@hearth/domains/acquiring/hooks/usePaymentsTableColumns'
+import { usePaymentsTableFilters } from '@hearth/domains/acquiring/hooks/usePaymentsTableFilters'
+import { usePosIntegrationAlert } from '@hearth/domains/acquiring/hooks/usePosIntegrationAlert'
+import { usePosIntegrationLastTestingPosReceipt } from '@hearth/domains/acquiring/hooks/usePosIntegrationLastTestingPosReceipt'
+import { Payment, PaymentsFilterTemplate } from '@hearth/domains/acquiring/utils/clientSchema'
+import { IFilters } from '@hearth/domains/acquiring/utils/helpers'
+import { useBillingAndAcquiringContexts } from '@hearth/domains/billing/components/BillingPageContent/ContextProvider'
+import { ExportToExcelActionBar } from '@hearth/domains/common/components/ExportToExcelActionBar'
+import { useLayoutContext } from '@hearth/domains/common/components/LayoutContext'
+import { Loader } from '@hearth/domains/common/components/Loader'
+import { DEFAULT_PAGE_SIZE, Table } from '@hearth/domains/common/components/Table/Index'
+import { getMoneyRender } from '@hearth/domains/common/components/Table/Renders'
+import { useDateRangeSearch } from '@hearth/domains/common/hooks/useDateRangeSearch'
+import {
+    MultipleFilterContextProvider,
+    useMultipleFiltersModal,
+} from '@hearth/domains/common/hooks/useMultipleFiltersModal'
+import { useQueryMappers } from '@hearth/domains/common/hooks/useQueryMappers'
+import { useSearch } from '@hearth/domains/common/hooks/useSearch'
+import { getPageIndexFromOffset, parseQuery } from '@hearth/domains/common/utils/tables.utils'
+
+
+const { publicRuntimeConfig: { defaultCurrencyCode } } = getConfig()
+
+const SORTABLE_PROPERTIES = ['advancedAt', 'depositedDate', 'amount']
+const PAYMENTS_DEFAULT_SORT_BY = ['advancedAt_DESC']
+const DEFAULT_DATE_RANGE: [Dayjs, Dayjs] = [dayjs().subtract(1, 'week'), dayjs()]
+
+const ROW_GUTTER: [Gutter, Gutter] = [0, 24]
+
+
+interface PaymentsTableContentProps {
+    areAlertLoading: boolean
+}
+
+const PaymentsTableContent: React.FC<PaymentsTableContentProps> = ({ areAlertLoading }): JSX.Element => {
+    const intl = useIntl()
+    const { lastTestingPosReceipt, loading: isLastTestingPosReceiptLoading, refetch: refetchLastTestingPosReceipt, b2bAppContext: posIntegrationContext } = usePosIntegrationLastTestingPosReceipt({
+        skipUntilAuthenticated: areAlertLoading,
+    })
+    // Track if date range has been cleared for testing receipt to prevent the effect from running
+    // multiple times and interfering with tab navigation (e.g., switching to accruals tab)
+    const hasDateRangeBeenClearedRef = React.useRef(false)
+    const SearchPlaceholder = intl.formatMessage({ id: 'filters.FullSearch' })
+    const StartDateMessage = intl.formatMessage({ id: 'pages.hearth.meter.StartDate' })
+    const EndDateMessage = intl.formatMessage({ id: 'pages.hearth.meter.EndDate' })
+    const ConfirmTitle = intl.formatMessage({ id: 'component.TicketWarningModal.ConfirmTitle' })
+    const TotalsSumTitle = intl.formatMessage({ id: 'pages.hearth.payments.TotalSum' })
+    const DoneSumTitle = intl.formatMessage({ id: 'MultiPayment.status.DONE' })
+    const WithdrawnSumTitle = intl.formatMessage({ id: 'MultiPayment.status.PROCESSING' })
+    const PaymentsCountTitle = intl.formatMessage({ id: 'pages.hearth.payments.summary.count' })
+    const ExportPaymentsTitle = intl.formatMessage({ id: 'pages.billing.payments.exportToExcel.title' })
+    
+    const { billingContexts, acquiringContexts } = useBillingAndAcquiringContexts()
+    const billingContext = billingContexts[0]
+
+    const { breakpoints } = useLayoutContext()
+    const router = useRouter()
+    const userOrganization = useOrganization()
+
+    const { filters, sorters, offset } = parseQuery(router.query)
+    const currentTab = router.query.tab
+
+    const currencyCode = get(billingContext, ['integration', 'currencyCode'], defaultCurrencyCode)
+
+    const [isStatusDescModalVisible, setIsStatusDescModalVisible] = useState<boolean>(false)
+    const [titleStatusDescModal, setTitleStatusDescModal] = useState('')
+    const [textStatusDescModal, setTextStatusDescModal] = useState('')
+    const openStatusDescModal = (statusType) => {
+        const titleModal = intl.formatMessage({ id: 'payment.status.description.title.' + statusType as FormatjsIntl.Message['ids'] })
+        const textModal = intl.formatMessage({ id: 'payment.status.description.text.' + statusType as FormatjsIntl.Message['ids'] })
+
+        setTitleStatusDescModal(titleModal)
+        setTextStatusDescModal(textModal)
+        setIsStatusDescModalVisible(true)
+    }
+
+    const tableColumns = usePaymentsTableColumns(currencyCode, openStatusDescModal, { lastTestingPosReceipt, posIntegrationContext, acquiringContexts })
+
+    useEffect(() => {
+        if (!areAlertLoading) {
+            refetchLastTestingPosReceipt()
+        }
+    }, [areAlertLoading, refetchLastTestingPosReceipt])
+
+    const organizationId = get(userOrganization, ['organization', 'id'], '')
+    const queryMetas = usePaymentsTableFilters(organizationId)
+
+    const currentPageIndex = getPageIndexFromOffset(offset, DEFAULT_PAGE_SIZE)
+    const { filtersToWhere, sortersToSortBy } = useQueryMappers(queryMetas, SORTABLE_PROPERTIES)
+
+    const [filtersAreReset, setFiltersAreReset] = useState(false)
+    const dateFallback = filtersAreReset ? null : DEFAULT_DATE_RANGE
+    const [dateRange, setDateRange] = useDateRangeSearch('depositedDate')
+    const dateFilterValue = dateRange || dateFallback
+    const dateFilter = dateFilterValue ? dateFilterValue.map(el => el.toISOString()) : null
+
+
+    const searchPaymentsQuery: Record<string, unknown> = {
+        ...filtersToWhere({ depositedDate: dateFilter, ...filters }),
+        organization: { id: organizationId },
+        status_in: [PAYMENT_WITHDRAWN_STATUS, PAYMENT_DONE_STATUS],
+        invoice_is_null: true,
+    }
+    const sortBy = sortersToSortBy(sorters, PAYMENTS_DEFAULT_SORT_BY)
+
+    const {
+        loading,
+        count,
+        objs,
+    } = Payment.useObjects({
+        where: searchPaymentsQuery,
+        sortBy: sortBy as SortPaymentsBy[],
+        first: DEFAULT_PAGE_SIZE,
+        skip: (currentPageIndex - 1) * DEFAULT_PAGE_SIZE,
+    }, {
+        fetchPolicy: 'network-only',
+    })
+
+    const { data: sumDonePayments, loading: donePaymentsLoading } = usePaymentsSum({ paymentsWhere: { ...searchPaymentsQuery, status: PaymentStatusType.Done } })
+    const { data: sumWithdrawnPayments, loading: withdrawnPaymentsLoading } = usePaymentsSum({ paymentsWhere: { ...searchPaymentsQuery, status: PaymentStatusType.Withdrawn } })
+    const { data: sumAllPayments, loading: allPaymentsLoading } = usePaymentsSum({ paymentsWhere: searchPaymentsQuery })
+
+    const [search, handleSearchChange, handleResetSearch] = useSearch<IFilters>()
+    const handleDateChange = useCallback((value) => {
+        if (!value) {
+            setFiltersAreReset(true)
+        }
+        setDateRange(value)
+    }, [setDateRange])
+
+    useEffect(() => {
+        if (lastTestingPosReceipt && !isLastTestingPosReceiptLoading && currentTab === 'payments' && !hasDateRangeBeenClearedRef.current) {
+            hasDateRangeBeenClearedRef.current = true
+            setFiltersAreReset(true)
+            setDateRange(null)
+        } else if (currentTab !== 'payments') {
+            // Reset flag when leaving the tab so it can be cleared again on return
+            hasDateRangeBeenClearedRef.current = false
+        }
+    }, [lastTestingPosReceipt, isLastTestingPosReceiptLoading, currentTab, setDateRange, setFiltersAreReset])
+
+    const onReset = useCallback(() => {
+        setFiltersAreReset(true)
+        handleResetSearch()
+    }, [handleResetSearch])
+
+    const {
+        MultipleFiltersModal,
+        ResetFiltersModalButton,
+        OpenFiltersButton,
+        appliedFiltersCount,
+    } = useMultipleFiltersModal({
+        filterMetas: queryMetas,
+        filtersSchemaGql: PaymentsFilterTemplate,
+        onReset,
+        extraQueryParameters: { tab: 'payments', type: 'list' },
+    })
+
+    const sortedDataSource = useMemo(() => {
+        if (!lastTestingPosReceipt || !objs) return objs
+        
+        const sortedObjs = [...objs]
+        const highlightedIndex = sortedObjs.findIndex(obj => obj.id === lastTestingPosReceipt.hearthPaymentId)
+        
+        if (highlightedIndex > 0) {
+            const [highlightedRow] = sortedObjs.splice(highlightedIndex, 1)
+            sortedObjs.unshift(highlightedRow)
+        }
+        
+        return sortedObjs
+    }, [objs, lastTestingPosReceipt])
+
+    const paymentsSummaryItems = useMemo(() => ([
+        {
+            key: 'total',
+            label: TotalsSumTitle,
+            value: getMoneyRender(intl, currencyCode)(sumAllPayments?.result?.sum),
+            loading: allPaymentsLoading,
+        },
+        {
+            key: 'done',
+            label: DoneSumTitle,
+            value: getMoneyRender(intl, currencyCode)(sumDonePayments?.result?.sum),
+            loading: donePaymentsLoading,
+            type: 'success' as const,
+        },
+        {
+            key: 'withdrawn',
+            label: WithdrawnSumTitle,
+            value: getMoneyRender(intl, currencyCode)(sumWithdrawnPayments?.result?.sum),
+            loading: withdrawnPaymentsLoading,
+            type: 'warning' as const,
+        },
+        {
+            key: 'count',
+            label: PaymentsCountTitle,
+            value: count || 0,
+            loading,
+        },
+    ]), [TotalsSumTitle, intl, currencyCode, sumAllPayments?.result?.sum, allPaymentsLoading, DoneSumTitle, sumDonePayments?.result?.sum, donePaymentsLoading, WithdrawnSumTitle, sumWithdrawnPayments?.result?.sum, withdrawnPaymentsLoading, PaymentsCountTitle, count, loading])
+
+    return (
+        <Tour.Provider>
+            <Row gutter={ROW_GUTTER} align='middle' justify='center'>
+                <PaymentsTableFilterBar
+                    search={{ value: search, placeholder: SearchPlaceholder, onChange: handleSearchChange }}
+                    datePickerProps={{ value: dateRange || dateFallback, onChange: handleDateChange, placeholder: [StartDateMessage, EndDateMessage] }}
+                    modalFilters={{ count: appliedFiltersCount, resetButton: <ResetFiltersModalButton />, openButton: <OpenFiltersButton showLabel={false} /> }}
+                />
+
+
+                <Col span={24}>
+                    <Space size={8} direction='vertical' width='100%'>
+                        <PaymentsSummary items={paymentsSummaryItems} />
+                        <Table
+                            loading={loading || isLastTestingPosReceiptLoading}
+                            dataSource={sortedDataSource}
+                            totalRows={count}
+                            columns={tableColumns}
+                            onRow={(record) => {
+                                if (lastTestingPosReceipt && lastTestingPosReceipt.hearthPaymentId === record.id) {
+                                    return { style: { backgroundColor: colors.orange[1] } }
+                                }
+                            }}
+                        />
+                    </Space>
+                </Col>
+                <Col span={24}>
+                    <ExportToExcelActionBar
+                        hidden={!breakpoints.TABLET_LARGE}
+                        searchObjectsQuery={searchPaymentsQuery}
+                        sortBy={sortBy}
+                        exportToExcelQuery={EXPORT_PAYMENTS_TO_EXCEL}
+                        disabled={count < 1}
+                        label={ExportPaymentsTitle}
+                        buttonType='primary'
+                    />
+                </Col>
+            </Row>
+
+            <Modal
+                open={isStatusDescModalVisible}
+                onCancel={() => setIsStatusDescModalVisible(false)}
+                title={titleStatusDescModal}
+                footer={[
+                    <Button
+                        key='close'
+                        type='primary'
+                        onClick={() => setIsStatusDescModalVisible(false)}
+                    >
+                        {ConfirmTitle}
+                    </Button>,
+                ]}
+            >
+                <Typography.Text type='secondary'>
+                    {textStatusDescModal}
+                </Typography.Text>
+            </Modal>
+
+            <MultipleFiltersModal />
+        </Tour.Provider>
+    )
+}
+
+const PaymentsTable: React.FC = (props) => {
+    const { PosIntegrationAlert, loading: areAlertLoading } = usePosIntegrationAlert()
+
+    return (
+        <>
+            {areAlertLoading && (
+                <div className={styles.loaderContainer}>
+                    <Loader size='large' fill/>
+                </div>
+            )}
+            <Row gutter={ROW_GUTTER}>
+                {PosIntegrationAlert && (
+                    <Col span={24}>
+                        {PosIntegrationAlert}
+                    </Col>
+                )}
+                <Col span={24}>
+                    <MultipleFilterContextProvider>
+                        <PaymentsTableContent areAlertLoading={areAlertLoading} {...props} />
+                    </MultipleFilterContextProvider>
+                </Col>
+            </Row>
+        </>
+    )
+}
+
+export default PaymentsTable
