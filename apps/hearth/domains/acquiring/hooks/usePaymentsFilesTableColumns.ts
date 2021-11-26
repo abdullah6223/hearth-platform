@@ -1,0 +1,108 @@
+import { AcquiringIntegrationContext } from '@app/hearth/schema'
+import get from 'lodash/get'
+import { useRouter } from 'next/router'
+import { useMemo } from 'react'
+
+import { useIntl } from '@open-hearth/next/intl'
+
+import { getPaymentsFileStatusRender } from '@hearth/domains/acquiring/utils/clientSchema/Renders'
+import {
+    getColumnTooltip,
+    getDateRender,
+    getMoneyRender,
+    getTextRender,
+} from '@hearth/domains/common/components/Table/Renders'
+import { parseQuery } from '@hearth/domains/common/utils/tables.utils'
+
+
+type PaymentsFilesTableColumnsOptions = {
+    acquiringContexts?: AcquiringIntegrationContext[]
+}
+
+export function usePaymentsFilesTableColumns (currencyCode: string, options: PaymentsFilesTableColumnsOptions = {}): Record<string, unknown>[] {
+    const intl = useIntl()
+    const router = useRouter()
+
+    const RegistryNumberTitle = intl.formatMessage({ id: 'accrualsAndPayments.payments.type.registry.registryNumber' })
+    const AmountTitle = intl.formatMessage({ id: 'accrualsAndPayments.payments.type.registry.amount' })
+    const DateLoadTitle = intl.formatMessage({ id: 'accrualsAndPayments.payments.type.registry.filters.formationDate' })
+    const RegistryNameTitle = intl.formatMessage({ id: 'accrualsAndPayments.payments.type.registry.registryName' })
+    const UploadedRecordsTitle = intl.formatMessage({ id: 'accrualsAndPayments.payments.type.registry.uploadedRecords' })
+    const PaymentOrderColumnTitle = intl.formatMessage({ id: 'accrualsAndPayments.payments.type.registry.paymentOrder' })
+
+    const PaymentOrderTooltipTitle = intl.formatMessage({ id: 'PaymentOrder' })
+    const PaymentSourceTitle = intl.formatMessage({ id: 'field.Source' })
+    const StatusTitle = intl.formatMessage({ id: 'Status' })
+
+    const { filters } = parseQuery(router.query)
+
+    return useMemo(() => {
+        let search = get(filters, 'search')
+        search = Array.isArray(search) ? null : search
+
+        const stringSearch = getTextRender(String(search))
+        const hasSourceColumn = Boolean(options.acquiringContexts?.length > 1)
+
+        const columns = {
+            number: {
+                title: RegistryNumberTitle,
+                key: 'number',
+                dataIndex: 'number',
+                width: '10%',
+                render: stringSearch,
+            },
+            paymentOrder: {
+                title: getColumnTooltip(PaymentOrderColumnTitle, PaymentOrderTooltipTitle),
+                key: 'paymentOrder',
+                dataIndex: 'paymentOrder',
+                width: '15%',
+                render: stringSearch,
+            },
+            loadedAt: {
+                title: DateLoadTitle,
+                key: 'loadedAt',
+                dataIndex: ['loadedAt'],
+                sorter: true,
+                width: '15%',
+                render: getDateRender(intl, String(search)),
+            },
+            registryName: {
+                title: RegistryNameTitle,
+                key: 'name',
+                dataIndex: 'name',
+                width: hasSourceColumn ? '18%' : '25%',
+                render: stringSearch,
+            },
+            source: hasSourceColumn ? {
+                title: PaymentSourceTitle,
+                key: 'integration',
+                dataIndex: ['context', 'integration', 'name'],
+                width: '7%',
+            } : null,
+            amount: {
+                title: AmountTitle,
+                key: 'amount',
+                dataIndex: 'amount',
+                render: getMoneyRender(intl, currencyCode),
+                width: '15%',
+                sorter: true,
+            },
+            uploadedRecords: {
+                title: UploadedRecordsTitle,
+                key: 'paymentsCount',
+                dataIndex: 'paymentsCount',
+                width: '10%',
+                render: stringSearch,
+            },
+            status: {
+                title: StatusTitle,
+                key: 'status',
+                dataIndex: 'status',
+                width: '12%',
+                render: getPaymentsFileStatusRender(intl, search),
+            },
+        }
+
+        return Object.values(columns).filter(Boolean)
+    }, [filters, RegistryNumberTitle, PaymentOrderColumnTitle, PaymentOrderTooltipTitle, DateLoadTitle, intl, RegistryNameTitle, PaymentSourceTitle, AmountTitle, currencyCode, UploadedRecordsTitle, StatusTitle, options.acquiringContexts])
+}
