@@ -1,0 +1,185 @@
+import { AcquiringIntegrationTypeType } from '@app/hearth/schema'
+import Head from 'next/head'
+import React, { useMemo } from 'react'
+
+import { useFeatureFlags } from '@open-hearth/featureflags/FeatureFlagsContext'
+import { useIntl } from '@open-hearth/next/intl'
+import { useOrganization } from '@open-hearth/next/organization'
+import { TabItem, Typography } from '@open-hearth/ui'
+
+import { AcquiringIntegrationContext } from '@hearth/domains/acquiring/utils/clientSchema'
+import { PageHeader, PageWrapper } from '@hearth/domains/common/components/containers/BaseLayout'
+import { TablePageContent } from '@hearth/domains/common/components/containers/BaseLayout/BaseLayout'
+import { Loader } from '@hearth/domains/common/components/Loader'
+import { ControlRoomSettingsContent } from '@hearth/domains/common/components/settings/ControlRoomSettingsContent'
+import { MobileFeatureConfigContent } from '@hearth/domains/common/components/settings/MobileFeatureConfigContent'
+import { TabsPageContent } from '@hearth/domains/common/components/TabsPageContent'
+import { ORGANIZATION_DOCUMENTS, UI_HIDE_PAID_FEATURES } from '@hearth/domains/common/constants/featureflags'
+import {
+    SETTINGS_TAB_CONTACT_ROLES,
+    SETTINGS_TAB_PAYMENT_DETAILS,
+    SETTINGS_TAB_SUBSCRIPTION,
+    SETTINGS_TAB_CONTROL_ROOM,
+    SETTINGS_TAB_EMPLOYEE_ROLES,
+    SETTINGS_TAB_MOBILE_FEATURE_CONFIG,
+    SETTINGS_TAB_MARKETPLACE,
+    SETTINGS_TAB_DOCUMENTS,
+} from '@hearth/domains/common/constants/settingsTabs'
+import { PageComponentType } from '@hearth/domains/common/types'
+import { ContactRolesSettingsContent } from '@hearth/domains/contact/components/contactRoles/ContactRolesSettingsContent'
+import { OrganizationDocuments } from '@hearth/domains/document/components/OrganizationDocuments/OrganizationDocuments'
+import { CONTEXT_FINISHED_STATUS } from '@hearth/domains/miniapp/constants'
+import {
+    EmployeeRolesSettingsContent,
+} from '@hearth/domains/organization/components/EmployeeRolesSettingsContent'
+import { OrganizationRequired } from '@hearth/domains/organization/components/OrganizationRequired'
+import { RecipientSettingsContent } from '@hearth/domains/organization/components/Recipient/SettingsContent'
+import { MANAGING_COMPANY_TYPE } from '@hearth/domains/organization/constants/common'
+import { useEmployeeRolesPermissionsGroups } from '@hearth/domains/organization/hooks/useEmployeeRolesPermissionsGroups'
+import { SettingsReadPermissionRequired } from '@hearth/domains/settings/components/PageAccess'
+import { SubscriptionSettingsContent } from '@hearth/domains/subscription/components'
+import { useOrganizationSubscription, useSubscriptionPaymentSuccess } from '@hearth/domains/subscription/hooks'
+
+import MarketplaceSettingsPage from './marketplace'
+
+
+const ALWAYS_AVAILABLE_TABS = []
+
+const SettingsPage: PageComponentType = () => {
+    const intl = useIntl()
+    const PageTitle = intl.formatMessage({ id: 'global.section.settings' })
+    const RolesTitle = intl.formatMessage({ id: 'ContactRoles' })
+    const DetailsTitle = intl.formatMessage({ id: 'PaymentDetails' })
+    const ControlRoomTitle = intl.formatMessage({ id: 'ControlRoom' })
+    const EmployeeRolesTitle = intl.formatMessage({ id: 'EmployeeRoles' })
+    const MobileFeatureConfigTitle = intl.formatMessage({ id: 'pages.hearth.settings.barItem.MobileFeatureConfig' })
+    const MarketSettingTitle = intl.formatMessage({ id: 'global.section.marketplace' })
+    const DocumentsTitle = intl.formatMessage({ id: 'global.section.documents' })
+    const SubscriptionsTitle = intl.formatMessage({ id: 'Subscriptions' })
+
+    const userOrganization = useOrganization()
+    const userOrganizationId = useMemo(() => userOrganization?.organization?.id || null, [userOrganization])
+    const isManagingCompany = useMemo(() => (userOrganization?.organization?.type || MANAGING_COMPANY_TYPE) === MANAGING_COMPANY_TYPE, [userOrganization])
+    const canManageContactRoles = useMemo(() => userOrganization?.role?.canManageContactRoles || false, [userOrganization])
+    const canManageEmployeeRoles = useMemo(() => userOrganization?.role?.canManageRoles || false, [userOrganization])
+    const canManageMobileFeatureConfigsRoles = useMemo(() => userOrganization?.role?.canManageMobileFeatureConfigs || false, [userOrganization])
+    const canManageMarketSettingRoles = useMemo(() => userOrganization?.role?.canManageMarketSetting || false, [userOrganization])
+    const canReadDocuments = useMemo(() => userOrganization?.role?.canReadDocuments || false, [userOrganization])
+
+    const { hasSubscription, hasAvailablePlans, loading: subscriptionsLoading, hasSubscriptionsFeature } = useOrganizationSubscription()
+    const { useFlag } = useFeatureFlags()
+    const hidePaidFeatures = useFlag(UI_HIDE_PAID_FEATURES)
+    const organizationDocumentsFeature = useFlag(ORGANIZATION_DOCUMENTS)
+    const isSubscriptionsEnabled = !subscriptionsLoading && hasAvailablePlans && hasSubscriptionsFeature
+
+    const { objs: [acquiringIntegrationContext], loading: acquiringIntegrationContextLoading } = AcquiringIntegrationContext.useObjects({
+        where: {
+            organization: { id: userOrganizationId },
+            invoiceStatus: CONTEXT_FINISHED_STATUS,
+            integration: { type: AcquiringIntegrationTypeType.OnlineProcessing },
+        },
+        first: 1,
+    })
+
+    const loading = subscriptionsLoading || acquiringIntegrationContextLoading
+
+    const availableTabs = useMemo(() => {
+        if (!hidePaidFeatures && !hasSubscription && isSubscriptionsEnabled) return [SETTINGS_TAB_SUBSCRIPTION]
+        const availableTabs = [...ALWAYS_AVAILABLE_TABS]
+
+        if (canManageEmployeeRoles && isManagingCompany) availableTabs.push(SETTINGS_TAB_EMPLOYEE_ROLES)
+        if (isManagingCompany) availableTabs.push(SETTINGS_TAB_PAYMENT_DETAILS)
+        if (canManageContactRoles && isManagingCompany) availableTabs.push(SETTINGS_TAB_CONTACT_ROLES)
+        if (isManagingCompany) availableTabs.push(SETTINGS_TAB_CONTROL_ROOM)
+        if (canManageMobileFeatureConfigsRoles) availableTabs.push(SETTINGS_TAB_MOBILE_FEATURE_CONFIG)
+        if (canManageMarketSettingRoles && Boolean(acquiringIntegrationContext) && !acquiringIntegrationContextLoading) availableTabs.push(SETTINGS_TAB_MARKETPLACE)
+        if (!hidePaidFeatures && isSubscriptionsEnabled) availableTabs.push(SETTINGS_TAB_SUBSCRIPTION)
+        if (canReadDocuments && organizationDocumentsFeature) availableTabs.push(SETTINGS_TAB_DOCUMENTS)
+    
+        return availableTabs
+    }, [hidePaidFeatures, hasSubscription, isSubscriptionsEnabled, canManageEmployeeRoles, isManagingCompany, canManageContactRoles, canManageMobileFeatureConfigsRoles, canManageMarketSettingRoles, acquiringIntegrationContext, acquiringIntegrationContextLoading, canReadDocuments, organizationDocumentsFeature])
+
+    const settingsTabs: TabItem[] = useMemo(() => {
+        const subscriptionTab = {
+            key: SETTINGS_TAB_SUBSCRIPTION,
+            label: SubscriptionsTitle,
+            children: <SubscriptionSettingsContent />,
+        }
+            
+        if (!hidePaidFeatures && !hasSubscription && isSubscriptionsEnabled) return [subscriptionTab]
+
+        return [
+            canManageEmployeeRoles && isManagingCompany && {
+                key: SETTINGS_TAB_EMPLOYEE_ROLES,
+                label: EmployeeRolesTitle,
+                children: <EmployeeRolesSettingsContent useEmployeeRolesTableData={useEmployeeRolesPermissionsGroups} />,
+            },
+            isManagingCompany && {
+                key: SETTINGS_TAB_PAYMENT_DETAILS,
+                label: DetailsTitle,
+                children: <RecipientSettingsContent/>,
+            },
+            canManageContactRoles && isManagingCompany && {
+                key: SETTINGS_TAB_CONTACT_ROLES,
+                label: RolesTitle,
+                children: <ContactRolesSettingsContent/>,
+            },
+            isManagingCompany && {
+                key: SETTINGS_TAB_CONTROL_ROOM,
+                label: ControlRoomTitle,
+                children: <ControlRoomSettingsContent/>,
+            },
+            canManageMobileFeatureConfigsRoles && {
+                key: SETTINGS_TAB_MOBILE_FEATURE_CONFIG,
+                label: MobileFeatureConfigTitle,
+                children: <MobileFeatureConfigContent/>,
+            },
+            canManageMarketSettingRoles && Boolean(acquiringIntegrationContext) && !acquiringIntegrationContextLoading && {
+                key: SETTINGS_TAB_MARKETPLACE,
+                label: MarketSettingTitle,
+                children: <MarketplaceSettingsPage/>,
+            },
+            canReadDocuments && organizationDocumentsFeature && {
+                key: SETTINGS_TAB_DOCUMENTS,
+                label: DocumentsTitle,
+                children: <OrganizationDocuments/>,
+            },
+            !hidePaidFeatures && isSubscriptionsEnabled && subscriptionTab,
+        ].filter(Boolean)
+    }, [SubscriptionsTitle, hidePaidFeatures, hasSubscription, isSubscriptionsEnabled, canManageEmployeeRoles, isManagingCompany, EmployeeRolesTitle, DetailsTitle, canManageContactRoles, RolesTitle, ControlRoomTitle, canManageMobileFeatureConfigsRoles, MobileFeatureConfigTitle, canManageMarketSettingRoles, acquiringIntegrationContext, acquiringIntegrationContextLoading, MarketSettingTitle, canReadDocuments, organizationDocumentsFeature, DocumentsTitle])
+
+    const titleContent = useMemo(() => (
+        <Typography.Title>{PageTitle}</Typography.Title>
+    ), [PageTitle])
+
+    // the settings page sells plans and features together, so the latest paid bundle decides what to congratulate on
+    useSubscriptionPaymentSuccess({
+        organizationId: userOrganizationId,
+    })
+
+    return (
+        <>
+            <Head>
+                <title>
+                    {PageTitle}
+                </title>
+            </Head>
+            <PageWrapper>
+                <OrganizationRequired>
+                    <PageHeader title={titleContent}/>
+                    <TablePageContent>
+                        {
+                            loading ? 
+                                <Loader /> : 
+                                <TabsPageContent tabItems={settingsTabs} availableTabs={availableTabs} />
+                        }
+                    </TablePageContent>
+                </OrganizationRequired>
+            </PageWrapper>
+        </>
+    )
+}
+
+SettingsPage.requiredAccess = SettingsReadPermissionRequired
+
+export default SettingsPage
