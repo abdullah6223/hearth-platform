@@ -1,0 +1,76 @@
+query getAvailableFeatureSubscriptionPlans($organization: OrganizationWhereUniqueInput!) {
+    result: getAvailableSubscriptionPlans(organization: $organization, planType: feature) {
+        plans {
+            plan {
+                id
+                name
+                description
+                priority
+                trialDays
+                planType
+                enabledB2BApps
+                enabledB2CApps
+                tickets
+                meters
+                payments
+                news
+                marketplace
+                analytics
+                properties
+                support
+                ai
+                customization
+                pdfReceipts
+            }
+            prices {
+                id
+                name
+                period
+                price
+                currencyCode
+            }
+        }
+    }
+}
+
+query getAvailableServiceSubscriptionPlans($organization: OrganizationWhereUniqueInput!) {
+    result: getAvailableSubscriptionPlans(organization: $organization, planType: service) {
+        features {
+            feature
+            availability
+        }
+        plans {
+            plan {
+                id
+                priority
+                name
+                description
+                organizationType
+                planType
+                isHidden
+                trialDays
+                canBePromoted
+                tickets
+                meters
+                payments
+                news
+                marketplace
+                analytics
+                properties
+                support
+                ai
+                enabledB2BApps
+                enabledB2CApps
+                customization
+                pdfReceipts
+            }
+            prices {
+                id
+                name
+                period
+                price
+                currencyCode
+            }
+        }
+    }
+}

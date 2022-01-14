@@ -1,0 +1,15 @@
+mutation registerSubscriptionContexts($data: RegisterSubscriptionContextsInput!) {
+    result: registerSubscriptionContexts(data: $data) {
+        subscriptionContexts {
+            id
+            startAt
+            endAt
+            isTrial
+            status
+        }
+        directPaymentUrl
+        multiPayment {
+            id
+        }
+    }
+}
