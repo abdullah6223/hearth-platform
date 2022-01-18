@@ -1,0 +1,96 @@
+.card-wrapper {
+  position: relative;
+  display: flex;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* A lower plan than the active one can be opened to compare, but it is not for sale */
+.card-wrapper-below-active {
+  opacity: 0.5;
+}
+
+.card-wrapper:focus-visible {
+  border-radius: var(--hearth-global-border-radius-medium);
+  outline: 2px solid var(--hearth-global-color-green-5);
+  outline-offset: 2px;
+}
+
+.subscription-plan-card {
+  display: flex;
+  flex-direction: column;
+  transition: border-color var(--hearth-global-transition-duration-default) ease;
+}
+
+/* The card body has to stretch too, otherwise the foot cannot pin prices to the bottom edge */
+.subscription-plan-card :global(.hearth-card-body) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.subscription-plan-card:hover {
+  border-color: var(--hearth-global-color-gray-5);
+}
+
+/* The badge sits above the card content, so a long plan name runs underneath it */
+.badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+/*
+ * Designs require at least 40px between the plan description and the price, and cards of
+ * equal height. The head grows with its text, the gap never shrinks below 40px, and the
+ * foot stays pinned to the bottom so prices line up across all cards in the row.
+ */
+.card-head {
+  margin-bottom: 40px;
+}
+
+.card-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.subscription-plan-card-selected:global(.hearth-card) {
+  border-color: var(--hearth-global-color-green-5);
+}
+
+.subscription-plan-card-promoted:global(.hearth-card) {
+  position: relative;
+  background: var(--hearth-global-color-brand-gradient-1);
+  background-clip: padding-box;
+  background-origin: border-box;
+  border: 1px solid transparent;
+}
+
+.subscription-plan-card-promoted:global(.hearth-card)::before {
+  position: absolute;
+  padding: 1px;
+  background: var(--hearth-global-color-brand-gradient-3);
+  border-radius: inherit;
+  transition: background 0.3s ease;
+  content: "";
+  pointer-events: none;
+  inset: 0;
+  mask: linear-gradient(#fff 0 0, #fff) content-box, linear-gradient(#fff 0 0, #fff);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.subscription-plan-card-promoted:global(.hearth-card):hover::before {
+  background: var(--hearth-global-color-brand-gradient-7);
+}

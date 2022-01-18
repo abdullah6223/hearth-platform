@@ -1,0 +1,531 @@
+import dayjs from 'dayjs'
+import React, { useCallback, useMemo, useRef } from 'react'
+
+import { useFeatureFlags } from '@open-hearth/featureflags/FeatureFlagsContext'
+import { useIntl } from '@open-hearth/next/intl'
+import { useOrganization } from '@open-hearth/next/organization'
+import { ActionBar, Button, Radio, Space, Tag, Typography } from '@open-hearth/ui'
+import { colors } from '@open-hearth/ui/colors'
+
+import { Loader } from '@hearth/domains/common/components/Loader'
+import { UI_HIDE_PAID_FEATURES } from '@hearth/domains/common/constants/featureflags'
+import { SUBSCRIPTION_PERIOD } from '@hearth/domains/subscription/constants'
+import {
+    useActivateSubscriptions,
+    useTrialSubscriptions,
+    useOrganizationSubscription,
+    useSubscriptionPlansPage,
+    useSubscriptionSelection,
+    useCancelSubscriptionFeatures,
+    useSubscriptionCheckout,
+    useIndividualPriceRequest,
+} from '@hearth/domains/subscription/hooks'
+import { usePaymentHistoryModal } from '@hearth/domains/subscription/hooks/usePaymentHistoryModal'
+import { isSameDay } from '@hearth/domains/subscription/utils/subscriptionCatalog'
+import { getOutstandingPayments } from '@hearth/domains/subscription/utils/subscriptionPlanAlerts'
+import { formatAmount, getAmount, getDiscount, isIndividualPrice } from '@hearth/domains/subscription/utils/subscriptionPricing'
+
+import { PriceText } from './PriceText/PriceText'
+import { PromoBanner } from './PromoBanner/PromoBanner'
+import { SubscriptionCheckoutModal } from './SubscriptionCheckoutModal/SubscriptionCheckoutModal'
+import { SubscriptionFeatureTable } from './SubscriptionFeatureTable/SubscriptionFeatureTable'
+import { SubscriptionPlanCard } from './SubscriptionPlanCard/SubscriptionPlanCard'
+import { SubscriptionPlanSummary } from './SubscriptionPlanSummary/SubscriptionPlanSummary'
+import { SubscriptionRemoveModal } from './SubscriptionRemoveModal/SubscriptionRemoveModal'
+import styles from './SubscriptionSettingsContent.module.css'
+
+import type { RowBadge } from './SubscriptionFeatureTable/SubscriptionFeatureTable'
+import type { ServicePlanView } from '@hearth/domains/subscription/hooks/useSubscriptionPlansPage'
+import type { SelectionMode } from '@hearth/domains/subscription/hooks/useSubscriptionSelection'
+import type { CatalogRow } from '@hearth/domains/subscription/utils/subscriptionCatalog'
+import type { OutstandingPayment, UnpaidSubscriptionContext } from '@hearth/domains/subscription/utils/subscriptionPlanAlerts'
+import type { PlanPeriod } from '@hearth/domains/subscription/utils/subscriptionPricing'
+import type { RadioChangeEvent } from 'antd'
+import type { IntlShape } from 'react-intl'
+
+
+const PLAN_CARD_EMOJIS = ['🏠', '🏁', '💼', '👑']
+
+type RowPayment = Pick<OutstandingPayment<UnpaidSubscriptionContext>, 'type' | 'daysLeft'>
+
+/** An option waiting for its payment says so in its own row, the plan card keeps the plan's status */
+const buildPaymentBadge = (payment: RowPayment, intl: IntlShape): RowBadge | null => {
+    switch (payment.type) {
+        case 'invoicePending':
+            return {
+                text: intl.formatMessage({ id: 'subscription.planCard.badge.invoicePending' }, { days: payment.daysLeft }),
+                bgColor: colors.orange[5],
+            }
+        case 'invoiceExpired':
+            return { text: intl.formatMessage({ id: 'subscription.planCard.badge.invoiceExpired' }), bgColor: colors.red[5] }
+        case 'cardFailed':
+            return { text: intl.formatMessage({ id: 'subscription.planCard.badge.cardFailed' }), bgColor: colors.red[5] }
+        default:
+            return null
+    }
+}
+
+/**
+ * The plan card already carries a trial badge. A feature only gets its own badge in the
+ * table when its trial runs on a different schedule than the plan's.
+ */
+const buildRowBadge = (row: CatalogRow, intl: IntlShape, planEndAt?: string | null, payment?: RowPayment | null): RowBadge | null => {
+    if (row.includedInPlan) return null
+    // an unpaid invoice or charge is what the client has to act on, so it wins over the option's own status
+    if (payment) return buildPaymentBadge(payment, intl)
+
+    const status = row.status
+    if (!status) return null
+
+    switch (status.type) {
+        case 'connected':
+            return { text: intl.formatMessage({ id: 'subscription.featureTable.badge.connected' }), bgColor: colors.green[5] }
+        // still works, but won't renew - the end date is what tells them apart from a plain connected one
+        case 'renewalCancelled': {
+            const date = dayjs(status.endAt)
+            const formattedDate = date.format(date.year() === dayjs().year() ? 'D MMMM' : 'D MMMM YYYY')
+            return {
+                text: intl.formatMessage({ id: 'subscription.featureTable.badge.connectedUntil' }, { date: formattedDate }),
+                bgColor: colors.green[5],
+            }
+        }
+        case 'trialExpired':
+            return { text: intl.formatMessage({ id: 'subscription.planCard.badge.trialExpired' }), bgColor: colors.gray[7] }
+        case 'paymentExpired':
+            return { text: intl.formatMessage({ id: 'subscription.planCard.badge.paymentExpired' }), bgColor: colors.red[5] }
+        case 'trial':
+            // A trial running in step with the plan is already announced on the plan card
+            if (isSameDay(status.endAt, planEndAt)) return null
+            return {
+                text: intl.formatMessage({ id: 'subscription.planCard.badge.activeDays' }, { days: status.daysLeft }),
+                bgColor: status.daysLeft <= 7 ? colors.orange[5] : colors.green[5],
+            }
+        default:
+            return null
+    }
+}
+
+/** ActionBar takes a plain string only, so the priced message is built separately and passed in as its first element */
+const buildActionBarMessage = (params: {
+    intl: IntlShape
+    period: PlanPeriod
+    isPlanInCart: boolean
+    isBuying: boolean
+    selectedPlanCard: ServicePlanView | null
+    selectedRows: ReadonlyArray<CatalogRow>
+    currencyCode: string | null
+}): React.ReactElement => {
+    const { intl, period, isPlanInCart, isBuying, selectedPlanCard, selectedRows, currencyCode } = params
+
+    const periodNoun = intl.formatMessage({ id: `subscription.planCard.planPrice.${period}.noun` as FormatjsIntl.Message['ids'] })
+    const featuresAmount = selectedRows.reduce((sum, row) => sum + (getAmount(row.price) ?? 0), 0)
+    const featuresFullAmount = selectedRows.reduce((sum, row) => sum + (getDiscount(row.prices, period)?.fullAmount ?? getAmount(row.price) ?? 0), 0)
+
+    const planPart = isPlanInCart && selectedPlanCard ? intl.formatMessage(
+        { id: isIndividualPrice(selectedPlanCard.price) ? 'subscription.actionBar.planOnly' : 'subscription.actionBar.plan' },
+        {
+            planName: selectedPlanCard.planInfo.plan.name,
+            amount: (
+                <PriceText
+                    key='plan-amount'
+                    amount={getAmount(selectedPlanCard.price) ?? 0}
+                    fullAmount={isBuying ? selectedPlanCard.discount?.fullAmount ?? null : null}
+                    currencyCode={currencyCode}
+                    locale={intl.locale}
+                />
+            ),
+            period: periodNoun,
+        }
+    ) : null
+    const featuresPart = selectedRows.length > 0 ? intl.formatMessage(
+        { id: 'subscription.actionBar.features' },
+        {
+            count: selectedRows.length,
+            amount: (
+                <PriceText
+                    key='features-amount'
+                    amount={featuresAmount}
+                    fullAmount={isBuying ? featuresFullAmount : null}
+                    currencyCode={currencyCode}
+                    locale={intl.locale}
+                />
+            ),
+            period: periodNoun,
+        }
+    ) : null
+
+    return (
+        <Typography.Text key='message' strong>
+            {planPart}
+            {planPart && featuresPart && ' + '}
+            {featuresPart}
+        </Typography.Text>
+    )
+}
+
+/** removeButton and cancelButton stand ready under any mode; which of them show up, and alongside what, follows the mode alone */
+const buildActionBarActions = (params: {
+    intl: IntlShape
+    mode: SelectionMode
+    canManageSubscriptions: boolean
+    selectedRows: ReadonlyArray<CatalogRow>
+    isPlanInCart: boolean
+    cartPriceIds: ReadonlyArray<string>
+    needsPlanInCart: boolean
+    canTryFree: boolean
+    activateLoading: boolean
+    currencyCode: string | null
+    openRemove: () => void
+    clearSelection: () => void
+    openPaymentHistoryModal: () => void
+    openCheckout: () => void
+    handleTryFree: () => void
+    individualRequest: { isPending: boolean, loading: boolean, onClick: () => void } | null
+    RemoveMessage: string
+    CancelMessage: string
+    PaymentHistoryMessage: string
+    CheckoutMessage: string
+}): React.ReactElement[] => {
+    const {
+        intl, mode, canManageSubscriptions, selectedRows, isPlanInCart, cartPriceIds, needsPlanInCart,
+        canTryFree, activateLoading, currencyCode, openRemove, clearSelection, openPaymentHistoryModal,
+        openCheckout, handleTryFree, individualRequest, RemoveMessage, CancelMessage, PaymentHistoryMessage, CheckoutMessage,
+    } = params
+
+    const removeButton = (
+        <Button
+            key='remove'
+            id='subscription-action-bar-remove-button'
+            type='secondary'
+            danger
+            onClick={openRemove}
+            disabled={!canManageSubscriptions}
+        >
+            {RemoveMessage}
+        </Button>
+    )
+
+    // The plan alone is bought or renewed without a way back; picked features can always be unpicked
+    const cancelButton = selectedRows.length > 0 && !isPlanInCart ? [
+        <Button key='cancel' id='subscription-action-bar-cancel-button' type='secondary' onClick={clearSelection}>
+            {CancelMessage}
+        </Button>,
+    ] : []
+
+    if (mode === 'connected') {
+        return [removeButton, ...cancelButton]
+    }
+
+    if (mode === 'paymentExpired') {
+        return [
+            <Button key='history' id='subscription-action-bar-payment-history-button' type='primary' onClick={openPaymentHistoryModal}>
+                {PaymentHistoryMessage}
+            </Button>,
+            removeButton,
+            ...cancelButton,
+        ]
+    }
+
+    const tryFreeButton = canTryFree ? [
+        <Button
+            key='trial'
+            id='subscription-action-bar-trial-button'
+            type='secondary'
+            onClick={handleTryFree}
+            loading={activateLoading}
+            disabled={!canManageSubscriptions}
+        >
+            {intl.formatMessage(
+                { id: 'subscription.planCard.tryFree' },
+                { formattedPrice: formatAmount(0, currencyCode || 'RUB', intl.locale) }
+            )}
+        </Button>,
+    ] : []
+
+    if (individualRequest) {
+        return [
+            <Button
+                key='request'
+                id='subscription-action-bar-request-button'
+                type='primary'
+                onClick={individualRequest.onClick}
+                loading={individualRequest.loading}
+                disabled={!canManageSubscriptions || individualRequest.isPending}
+            >
+                {intl.formatMessage({ id: individualRequest.isPending ? 'subscription.planCard.requestPending' : 'subscription.planCard.submitRequest' })}
+            </Button>,
+            ...tryFreeButton,
+            ...cancelButton,
+        ]
+    }
+
+    return [
+        <Button
+            key='checkout'
+            id='subscription-action-bar-checkout-button'
+            type='primary'
+            onClick={openCheckout}
+            disabled={!canManageSubscriptions || cartPriceIds.length === 0 || needsPlanInCart}
+        >
+            {CheckoutMessage}
+        </Button>,
+        ...tryFreeButton,
+        ...cancelButton,
+    ]
+}
+
+export const SubscriptionSettingsContent: React.FC = () => {
+    const intl = useIntl()
+    const { useFlag } = useFeatureFlags()
+    const hidePaidFeatures = useFlag(UI_HIDE_PAID_FEATURES)
+    const { role } = useOrganization()
+
+    const YearlyLabel = intl.formatMessage({ id: 'subscription.period.yearly' })
+    const MonthlyLabel = intl.formatMessage({ id: 'subscription.period.monthly' })
+    const CheckoutMessage = intl.formatMessage({ id: 'subscription.actionBar.checkout' })
+    const RemoveMessage = intl.formatMessage({ id: 'subscription.actionBar.remove' })
+    const CancelMessage = intl.formatMessage({ id: 'subscription.actionBar.cancel' })
+    const PaymentHistoryMessage = intl.formatMessage({ id: 'subscription.paymentHistory.title' })
+
+    const periodSwitchRef = useRef<HTMLDivElement>(null)
+
+    const {
+        loading,
+        period,
+        setPeriod,
+        maxDiscountPercent,
+        planCards,
+        selectedPlanId,
+        selectedPlanInfo,
+        selectPlan,
+        paidPlanId,
+        paidPriority,
+        activePlanId,
+        activeServiceContext,
+        rows,
+        counters,
+        capabilityLabels,
+        activatedSubscriptions,
+        unpaidSubscriptions,
+        refetchActivatedSubscriptions,
+        refetchUnpaidSubscriptions,
+    } = useSubscriptionPlansPage()
+    const { PaymentHistoryModal, openModal: openPaymentHistoryModal } = usePaymentHistoryModal()
+    const { hasSubscription } = useOrganizationSubscription()
+
+    const { trialSubscriptions } = useTrialSubscriptions()
+    const { registerSubscriptionBundle, activateLoading } = useActivateSubscriptions()
+
+    const outstandingPayments = useMemo(() => (
+        getOutstandingPayments(unpaidSubscriptions, activatedSubscriptions.filter(context => !context.isTrial), new Date())
+    ), [unpaidSubscriptions, activatedSubscriptions])
+
+    // an issued invoice still waiting to be paid - buying the same plan again would just issue a second one
+    const pendingPlanIds = useMemo(() => new Set(
+        outstandingPayments
+            .filter(({ type }) => type === 'invoicePending')
+            .map(({ context }) => context.subscriptionPlan.id)
+    ), [outstandingPayments])
+
+    const selection = useSubscriptionSelection({
+        rows,
+        planCards,
+        selectedPlanId,
+        paidPlanId,
+        paidPriority,
+        period,
+        includedCount: counters.included,
+        pendingPlanIds,
+    })
+
+    const handleRefetch = useCallback(async () => {
+        await Promise.all([refetchActivatedSubscriptions(), refetchUnpaidSubscriptions()])
+    }, [refetchActivatedSubscriptions, refetchUnpaidSubscriptions])
+
+    const { cancelFeaturePlans, loading: cancelLoading } = useCancelSubscriptionFeatures({
+        onCancelled: handleRefetch,
+    })
+
+    /** Clicking a plan card behaves like a tab: it scrolls the switch to the top and re-reads the table */
+    const handleSelectPlan = useCallback((planId: string) => {
+        selectPlan(planId)
+        periodSwitchRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, [selectPlan])
+
+    const handlePeriodChange = useCallback((event: RadioChangeEvent) => {
+        setPeriod(event.target.value as PlanPeriod)
+    }, [setPeriod])
+
+    const canManageSubscriptions = Boolean(role?.canManageSubscriptions)
+
+    /** The same unpaid registrations the plan cards warn about, keyed by the option they are for */
+    const paymentByFeaturePlanId = useMemo(() => new Map(
+        outstandingPayments
+            .filter(({ context }) => context.subscriptionPlan?.planType === 'feature')
+            .map(({ context, type, daysLeft }) => [context.subscriptionPlan.id, { type, daysLeft }] as const)
+    ), [outstandingPayments])
+
+    const getRowBadge = useCallback(
+        (row: CatalogRow): RowBadge | null => buildRowBadge(
+            row, intl, activeServiceContext?.endAt, paymentByFeaturePlanId.get(row.featurePlan?.id) ?? null
+        ),
+        [activeServiceContext?.endAt, intl, paymentByFeaturePlanId]
+    )
+
+    const { totals, mode, selectedRows, isPlanInCart, selectedPlanCard, clearSelection } = selection
+    const isBuying = mode === 'idle' || mode === 'buy'
+    // Features hang off a running plan: with none running they can only be bought together with a plan
+    const needsPlanInCart = !hasSubscription && !isPlanInCart
+
+    const {
+        cartPriceIds,
+        isCheckoutOpen,
+        openCheckout,
+        closeCheckout,
+        handleCheckoutConfirm,
+        handleCheckoutUpsell,
+        PaymentModal,
+        isRemoveOpen,
+        openRemove,
+        closeRemove,
+        handleRemoveConfirm,
+        handleInvoiceAction,
+        canTryRow,
+        handleTryRow,
+        canTryFree,
+        handleTryFree,
+    } = useSubscriptionCheckout({
+        planCards,
+        selectedRows,
+        isPlanInCart,
+        selectedPlanCard,
+        clearSelection,
+        isBuying,
+        needsPlanInCart,
+        hasSubscription,
+        trialSubscriptions,
+        registerSubscriptionBundle,
+        activateLoading,
+        refetchSubscriptions: handleRefetch,
+        cancelFeaturePlans,
+    })
+
+    const { requestIndividualPrice, requestedPlanIds, loading: requestLoading } = useIndividualPriceRequest()
+    const individualPlan = isPlanInCart && isIndividualPrice(selectedPlanCard?.price) ? selectedPlanCard : null
+
+    if (hidePaidFeatures) return null
+    if (loading) return <Loader />
+
+    const selectedPlanName = selectedPlanInfo?.plan?.name ?? ''
+    const hasSelection = totals.count > 0 && (isPlanInCart || selectedRows.length > 0)
+
+    const actionBarMessage = buildActionBarMessage({
+        intl, period, isPlanInCart, isBuying, selectedPlanCard, selectedRows, currencyCode: totals.currencyCode,
+    })
+    const actions = buildActionBarActions({
+        intl, mode, canManageSubscriptions, selectedRows, isPlanInCart, cartPriceIds, needsPlanInCart,
+        canTryFree, activateLoading, currencyCode: totals.currencyCode, openRemove, clearSelection,
+        openPaymentHistoryModal, openCheckout, handleTryFree,
+        individualRequest: individualPlan && {
+            isPending: requestedPlanIds.has(individualPlan.planInfo.plan.id),
+            loading: requestLoading,
+            onClick: () => requestIndividualPrice(individualPlan.price.id, individualPlan.planInfo.plan.name),
+        },
+        RemoveMessage, CancelMessage, PaymentHistoryMessage, CheckoutMessage,
+    })
+
+    return (
+        <>
+            {PaymentModal}
+            {PaymentHistoryModal}
+            <SubscriptionCheckoutModal
+                open={isCheckoutOpen}
+                onCancel={closeCheckout}
+                planCard={isPlanInCart ? selectedPlanCard : null}
+                contextPlanName={selectedPlanName}
+                selectedRows={selectedRows}
+                includedCount={counters.included}
+                period={period}
+                planEndAt={activeServiceContext?.endAt ?? null}
+                planCards={planCards}
+                currentPlanPriority={Number(selectedPlanInfo?.plan?.priority ?? 0)}
+                capabilityLabels={capabilityLabels}
+                loading={activateLoading}
+                onConfirm={handleCheckoutConfirm}
+                onConfirmUpsell={handleCheckoutUpsell}
+            />
+            <SubscriptionRemoveModal
+                open={isRemoveOpen}
+                onCancel={closeRemove}
+                names={selectedRows.map(row => row.label)}
+                planName={selectedPlanName}
+                loading={cancelLoading}
+                onConfirm={handleRemoveConfirm}
+            />
+
+            <Space size={40} direction='vertical' width='100%'>
+                <PromoBanner />
+
+                <div className={styles.periodSwitch} ref={periodSwitchRef}>
+                    <div className={styles.periodSwitchInner}>
+                        {maxDiscountPercent !== null && (
+                            <span className={styles.periodDiscountBadge}>
+                                <Tag bgColor={colors.green[5]} textColor={colors.white}>
+                                    {intl.formatMessage(
+                                        { id: 'subscription.period.yearly.discountBadge' },
+                                        { percent: maxDiscountPercent }
+                                    )}
+                                </Tag>
+                            </span>
+                        )}
+                        <Radio.Group optionType='button' value={period} onChange={handlePeriodChange}>
+                            <Radio value={SUBSCRIPTION_PERIOD.YEAR} label={YearlyLabel} />
+                            <Radio value={SUBSCRIPTION_PERIOD.MONTH} label={MonthlyLabel} />
+                        </Radio.Group>
+                    </div>
+                </div>
+
+                <div className={styles.planList} role='tablist'>
+                    {planCards.map((card, index) => (
+                        <SubscriptionPlanCard
+                            key={card.planInfo.plan.id}
+                            card={card}
+                            emoji={PLAN_CARD_EMOJIS[index]}
+                            activatedTrial={trialSubscriptions.find(
+                                trial => trial.subscriptionPlan?.id === card.planInfo.plan.id
+                            )}
+                            onSelect={handleSelectPlan}
+                            onInvoiceAction={handleInvoiceAction}
+                            refetchActivatedSubscriptions={handleRefetch}
+                        />
+                    ))}
+                </div>
+
+                <Space size={16} direction='vertical' width='100%'>
+                    <SubscriptionPlanSummary planName={selectedPlanName} counters={counters} />
+                    <SubscriptionFeatureTable
+                        rows={rows}
+                        period={period}
+                        isRowSelected={selection.isRowSelected}
+                        isRowDisabled={selection.isRowDisabled}
+                        isRowBlockedByMode={selection.isRowBlockedByMode}
+                        onToggleRow={selection.toggleRow}
+                        canTryRow={canTryRow}
+                        onTryRow={handleTryRow}
+                        activateLoading={activateLoading}
+                        getRowBadge={getRowBadge}
+                        canManageSubscriptions={canManageSubscriptions}
+                        isViewingActivePlan={Boolean(activePlanId) && selectedPlanId === activePlanId}
+                        planName={selectedPlanName}
+                    />
+                </Space>
+            </Space>
+
+            {hasSelection && (
+                <div style={{ width: '100%' }}>
+                    <ActionBar actions={[actionBarMessage, ...actions]} />
+                </div>
+            )}
+        </>
+    )
+}
