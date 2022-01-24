@@ -1,0 +1,462 @@
+/* Layout */
+.cowork-layout :global(.ant-layout-footer) {
+  display: none;
+}
+
+.cowork-layout :global(.page-wrapper) {
+  padding-bottom: var(--hearth-global-spacing-24);
+}
+
+.side-menu-logo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  width: 100%;
+
+  /* Expanded: .logo-container has 19px left padding. Add 13px to match the
+     collapsed icon position (32px from sidebar edge) so the icon stays put
+     when toggling the sidebar. */
+  padding-left: 13px;
+}
+
+/* Collapsed: .logo-container already has 32px left padding, reset our offset */
+:global(.ant-layout-sider-collapsed) .side-menu-logo {
+  padding-left: 0;
+}
+
+.logo-cowork {
+  position: relative;
+  display: inline-flex;
+  gap: var(--hearth-global-spacing-8);
+  align-items: center;
+  height: 32px;
+}
+
+.logo-cowork-title {
+  gap: var(--hearth-global-spacing-8);
+  animation: logo-cowork-title-in 0.3s ease 0.15s 1 both;
+}
+
+.logo-cowork-title :global(.hearth-typography) {
+  font-weight: 700;
+  white-space: nowrap;
+
+  /* Shift text down to align with the house body (green part), not the full
+     icon height which includes the sun overhang at the top. */
+  transform: translateY(3px);
+}
+
+@keyframes logo-cowork-title-in {
+  from {
+    transform: translateX(-8px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Body — sidebar + main */
+.side-menu-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.side-menu-divider {
+  flex-shrink: 0;
+  height: 1px;
+  margin: var(--hearth-global-spacing-4) 0;
+  background: var(--hearth-global-color-gray-3);
+}
+
+.side-menu-footer {
+  margin-top: auto;
+  padding: var(--hearth-global-spacing-12) var(--hearth-global-spacing-16);
+}
+
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.section-label {
+  display: inline-flex;
+  gap: var(--hearth-global-spacing-4);
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Make the antd Space row fill the full menu item width so the chevron can be
+   pushed to the right edge. Space is inline-flex by default and shrinks to content. */
+.section-menu-item :global(.hearth-space) {
+  width: 100%;
+}
+
+/* Let the label wrapper (second space item) take all remaining horizontal space. */
+.section-menu-item :global(.hearth-space-item:last-child) {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Propagate full width down through the label container and typography so that
+   .section-label's `width: 100%` + `justify-content: space-between` can push the
+   chevron to the right edge. */
+.section-menu-item :global(.hearth-space-item:last-child > div),
+.section-menu-item :global(.hearth-typography) {
+  width: 100%;
+}
+
+.chat-menu-item :global(.hearth-space) {
+  width: 100%;
+}
+
+.chat-menu-item :global(.hearth-space-item:last-child),
+.chat-menu-item :global(.hearth-space-item:last-child > div) {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chat-menu-item :global(.hearth-space-item:last-child) {
+  flex: 1;
+}
+
+.chat-menu-item :global(.hearth-typography) {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Chat page header — native PageHeader, tightened bottom padding */
+.chat-page-header {
+  padding: 0 0 var(--hearth-global-spacing-16) !important;
+}
+
+.chat-page-header :global(.ant-page-header-heading) {
+  align-items: center;
+}
+
+/* Keep the chat title on a single line and ellipsize long names */
+.chat-page-header :global(.hearth-typography) {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Welcome screen */
+.welcome-screen {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--hearth-global-spacing-24);
+  align-items: center;
+  justify-content: center;
+  padding: var(--hearth-global-spacing-24);
+  overflow: hidden;
+}
+
+/* Subtle Hearth outline watermark — large, right-aligned, behind the welcome content.
+   Disappears with the welcome screen when the user sends the first message. */
+.welcome-watermark {
+  position: absolute;
+  top: 50%;
+  right: -10%;
+  z-index: 0;
+  width: 120vh;
+  max-width: 1040px;
+  height: 120vh;
+  max-height: 1040px;
+  color: var(--hearth-global-color-gray-3);
+  transform: translateY(-50%);
+  opacity: 0.5;
+  animation: welcome-watermark-in 0.6s ease 0.2s 1 both;
+  pointer-events: none;
+}
+
+@keyframes welcome-watermark-in {
+  from {
+    transform: translateY(-50%) scale(0.92);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(-50%) scale(1);
+    opacity: 0.5;
+  }
+}
+
+/* Keep welcome content above the watermark */
+.welcome-screen > *:not(.welcome-watermark) {
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-title {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  color: var(--hearth-global-color-black);
+  font-weight: 700;
+  font-size: 28px;
+}
+
+.welcome-subtitle {
+  max-width: 500px;
+  color: var(--hearth-global-color-gray-6);
+  font-size: 15px;
+  text-align: center;
+}
+
+.welcome-input-wrapper {
+  width: 100%;
+  max-width: 640px;
+}
+
+/* Welcome screen — engineer persona enhancements */
+.welcome-hero-logo {
+  flex-shrink: 0;
+  margin-bottom: var(--hearth-global-spacing-8);
+  opacity: 0;
+  animation: welcome-hero-fade-in 0.4s ease 0.1s 1 both;
+}
+
+@keyframes welcome-hero-fade-in {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.welcome-capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hearth-global-spacing-8);
+  align-items: center;
+  justify-content: center;
+  max-width: 640px;
+}
+
+.welcome-capabilities-label {
+  color: var(--hearth-global-color-gray-7);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.welcome-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hearth-global-spacing-8);
+  align-items: center;
+  justify-content: center;
+  max-width: 640px;
+  margin-top: var(--hearth-global-spacing-4);
+}
+
+/* Make the antd Space fill the full width so its pill buttons center and wrap
+   uniformly within the .welcome-suggestions container. Space is inline-flex by
+   default and shrinks to content, which left-aligns the tags. */
+.welcome-suggestions :global(.hearth-space) {
+  justify-content: center;
+  width: 100%;
+}
+
+.suggestion-button {
+  color: var(--hearth-global-color-gray-7) !important;
+  background: var(--hearth-global-color-gray-1) !important;
+  border-color: transparent !important;
+  border-radius: 999px !important;
+}
+
+.suggestion-button:hover:not(:disabled) {
+  color: var(--hearth-global-color-gray-7) !important;
+  background: var(--hearth-global-color-gray-3) !important;
+  border-color: transparent !important;
+}
+
+/* Chat content (full width, contains the chat container) */
+.chat-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+/* Centered container that bounds AIChat — narrower than PageWrapper for readability */
+.chat-container {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1024px;
+  min-height: 0;
+  margin: 0 auto;
+  padding: 0;
+
+  /* Cowork AIChat theme — white surface, grey bubbles, centered content, floating input */
+  --ai-chat-bg: var(--hearth-global-color-white);
+  --ai-chat-bubble-bg: var(--hearth-global-color-gray-1);
+  --ai-chat-bubble-box-shadow: none;
+  --ai-chat-bubble-padding: var(--hearth-global-spacing-8) var(--hearth-global-spacing-16);
+  --ai-chat-content-max-width: 1024px;
+  --ai-chat-content-margin-inline: auto;
+  --ai-chat-markdown-width: 100%;
+  --ai-chat-padding-x: 0;
+
+  /* No overlay header in Cowork — page header sits in normal flow above. */
+  --ai-chat-header-height: 0;
+
+  /* 24px breathing room above the first message;
+     the bottom gap is controlled separately by --ai-chat-input-bottom-gap. */
+  --ai-chat-chrome-gap: var(--hearth-global-spacing-24);
+
+  /* Extra space below the last message, before the input. */
+  --ai-chat-input-bottom-gap: 64px;
+
+  /* Clean input — no card, no border, no shadow. Padding comes from PageWrapper. */
+  --ai-chat-input-position: absolute;
+  --ai-chat-input-max-width: none;
+  --ai-chat-input-margin-inline: 0;
+  --ai-chat-input-padding: 0;
+  --ai-chat-input-bg: transparent;
+  --ai-chat-input-backdrop: none;
+  --ai-chat-input-border: none;
+  --ai-chat-input-border-radius: 0;
+  --ai-chat-input-box-shadow: none;
+}
+
+/* Modal footer — delete-chat confirmation */
+.modal-footer {
+  display: flex;
+  gap: var(--hearth-global-spacing-8);
+  justify-content: flex-end;
+}
+
+/* Miniapps page */
+.miniapps-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--hearth-global-spacing-24);
+}
+
+.miniapps-title {
+  color: var(--hearth-global-color-black);
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.miniapps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--hearth-global-spacing-16);
+}
+
+.miniapp-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hearth-global-spacing-12);
+  padding: var(--hearth-global-spacing-16);
+  background: var(--hearth-global-color-white);
+  border: 1px solid var(--hearth-global-color-gray-3);
+  border-radius: var(--hearth-global-border-radius-large);
+  transition: box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.miniapp-card:hover {
+  border-color: var(--hearth-global-color-gray-4);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+}
+
+.miniapp-card-header {
+  display: flex;
+  gap: var(--hearth-global-spacing-12);
+  align-items: center;
+}
+
+.miniapp-card-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: var(--hearth-global-border-radius-medium);
+}
+
+.miniapp-card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.miniapp-card-icon-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--hearth-global-color-gray-5);
+  font-weight: 700;
+  font-size: 18px;
+  background: var(--hearth-global-color-gray-2);
+}
+
+.miniapp-card-name {
+  overflow: hidden;
+  color: var(--hearth-global-color-black);
+  font-weight: 600;
+  font-size: 16px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.miniapp-card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.miniapps-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--hearth-global-spacing-16);
+  align-items: center;
+  justify-content: center;
+  padding: var(--hearth-global-spacing-48);
+  text-align: center;
+}
+
+.miniapps-empty-title {
+  color: var(--hearth-global-color-black);
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.miniapps-empty-description {
+  max-width: 400px;
+  color: var(--hearth-global-color-gray-6);
+  font-size: 14px;
+}
+
+.miniapps-loading {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  color: var(--hearth-global-color-gray-5);
+  font-size: 14px;
+}
