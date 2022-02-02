@@ -1,0 +1,49 @@
+{
+  "name": "create-hearth-app",
+  "version": "0.0.0-development",
+  "description": "Create hearth miniapps with single command",
+  "keywords": [
+    "hearth",
+    "abdullah6223",
+    "miniapps",
+    "utils",
+    "React",
+    "NextJS"
+  ],
+  "homepage": "https://github.com/abdullah6223/hearth-platform/blob/main/packages/create-hearth-app/README.md",
+  "bugs": {
+    "url": "https://github.com/abdullah6223/hearth-platform/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdullah6223/hearth-platform.git",
+    "directory": "packages/create-hearth-app"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Abdullah",
+    "email": "abdullah.dev921@gmail.com",
+    "url": "https://github.com/abdullah6223"
+  },
+  "files": [
+    "dist"
+  ],
+  "bin": "dist/cli.js",
+  "scripts": {
+    "build": "tsup"
+  },
+  "devDependencies": {
+    "@open-hearth/tsconfig": "workspace:^",
+    "@types/prompts": "2.4.9",
+    "commander": "14.0.1",
+    "conf": "15.1.0",
+    "execa": "^5",
+    "glob": "^11.0.1",
+    "minimatch": "^10.2.2",
+    "picocolors": "1.1.1",
+    "prompts": "2.4.2",
+    "tsup": "^8.3.6",
+    "typescript": "^5.8.3",
+    "yaml": "2.9.1"
+  }
+}
