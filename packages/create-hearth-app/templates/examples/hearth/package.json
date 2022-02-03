@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "prepare": "node ./bin/prepare.js"
+  },
+  "devDependencies": {
+    "@open-hearth/cli": "workspace:^",
+    "@open-hearth/config": "workspace:^"
+  }
+}
