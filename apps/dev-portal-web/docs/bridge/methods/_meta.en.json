@@ -1,0 +1,13 @@
+{
+  "get-launch-params": "HearthWebAppGetLaunchParams",
+  "request-auth": "HearthWebAppRequestAuth",
+  "request-payment": "HearthWebAppRequestPayment",
+  "get-fragment": "HearthWebAppGetFragment",
+  "resize-window": "HearthWebAppResizeWindow",
+  "redirect": "HearthWebAppRedirect",
+  "close-application": "HearthWebAppCloseApplication",
+  "set-page-actions": "HearthWebAppSetPageActions",
+  "notifications": "Notifications",
+  "modals": "Modals",
+  "history": "History and navigation"
+}

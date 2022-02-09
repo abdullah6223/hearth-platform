@@ -1,0 +1,181 @@
+Hearth Bridge is a JS library that allows the frontend of your mini-application to communicate with the main application frontend.
+
+## Installation
+
+To install the library, just run the following command according to your package manager:
+<Tabs labels={['npm', 'yarn', 'pnpm']}>
+    ```bash
+    npm i @open-hearth/bridge
+    ```
+    ```bash
+    yarn add @open-hearth/bridge
+    ```
+    ```bash
+    pnpm i @open-hearth/bridge
+    ```
+</Tabs>
+
+## Basic usage example
+
+You can use bridge either within your frontend framework or directly in the browser environment:
+
+<Tabs labels={['JS', '<script/>']}>
+    ```typescript
+    import bridge from '@open-hearth/bridge'
+
+    // Send event
+    bridge.send('<event-name>')
+
+    // Send event with args
+    bridge.send('<event-name>', { someArg: 'some value' })
+
+    // Send event and process response
+    bridge.send('<event-name>', { someArg: 'some value' })
+        .then((response) => {
+            // successful state processing
+        }).catch((error) => {
+            // error processing
+        })
+    ```
+    ```html
+    <script src="https://unpkg.com/@open-hearth/bridge/dist/browser.min.js"></script>
+    <script>
+        hearthBridge.send('<event-name>')
+    </script>
+    ```
+</Tabs>
+
+## API Reference
+
+### bridge.send(method[, params])
+
+Sends a message to main client and returns the `Promise` object with response data
+
+**Parameters**
+
+- `method` (required) The method of Hearth Bridge
+- `params` (optional) Object containing method args
+
+**Example**
+
+```typescript
+// Sending event to client
+bridge
+.send('HearthWebAppResizeWindow', { height: 800 })
+.then(data => {
+    // Handling response
+    console.log(data.height)
+})
+.catch(error => {
+    // Handling an error
+});
+```
+
+Since `bridge.send` returns a Promise you can use `async / await` flow for handling events:
+
+```typescript
+
+try {
+    const response = await bridge.send('HearthWebAppResizeWindow', { height: 800 })
+    // Handling response
+    console.log(response.height)
+} catch (err) {
+    // Handling error
+}
+```
+
+### bridge.subscribe(listener)
+
+Subscribes listener to all incoming events and responses.
+
+<Alert type="info">
+    If method "&lt;method-name&gt;" is called, the handler will receive event with type "&lt;method-name&gt;Error" in case of an error,
+    and with type "&lt;method-name&gt;Result" in case of successful execution.
+    This is common behavior for all Hearth Bridge methods.
+</Alert>
+
+**Parameters**
+
+- `listener` (required) Function handling events
+
+**Example**
+
+```typescript
+// Subscribing to receive events
+bridge.subscribe((event) => {
+const { type, data } = event
+    if (type === 'HearthWebAppResizeWindowResult') {
+        // Processing event result
+        console.log(data.height)
+    } else if (type === 'HearthWebAppResizeWindowError') {
+        // Processing event error
+        const { errorType, errorMessage } = data
+    }
+})
+```
+
+### bridge.unsubscribe(listener)
+
+Unsubscribes a function from event listening
+
+**Parameters**
+
+- `listener` (required) Function handling events
+
+**Example**
+
+```typescript
+import bridge, { type HearthBridgeSubscriptionListener } from '@open-hearth/bridge'
+
+
+const myListener: HearthBridgeSubscriptionListener = (event) => {
+    logger.info(event)
+}
+
+// Subscribing
+bridge.subscribe(myListener)
+
+// Unsubscribing
+bridge.unsubscribe(myListener)
+```
+
+### bridge.supports(method)
+
+Checks if the main client (runtime environment) supports this method
+
+**Parameters**
+
+- `method` (required) The method of Hearth Bridge
+
+**Example**
+
+```typescript
+// Checking if event is available
+if (bridge.supports('HearthWebAppResizeWindow')) {
+    // Then sending actual event
+    bridge.send('HearthWebAppResizeWindow', { height: document.body.scrollHeight })
+}
+```
+
+## Error types
+
+Each error in Hearth Bridge has the following structure::
+```typescript
+type ClientErrorResponseData<Reason extends ErrorReason> = {
+    errorType: 'client',
+    errorReason: Reason
+    errorCode: ErrorCode<Reason>,
+    errorMessage: string
+}
+```
+
+The error details can be found in the `errorMessage` field and the error can be processed by its code / cause:
+<br/>
+| Error Reason       | Error Code | Erro description                                                                 |
+|--------------------|------------|----------------------------------------------------------------------------------|
+| ACCESS_DENIED      | 0          | Your application has no access to execute this method                            |
+| UNKNOWN_ERROR      | 1          | Something went wrong on the Hearth side, which is probably a bug                  |
+| UNKNOWN_METHOD     | 2          | Application was tried to call unknown or unsupported method for current platform |
+| INVALID_PARAMETERS | 3          | Invalid method parameters was passed                                             |
+| HANDLER_ERROR      | 4          | Error was thrown during handler execution                                        |
+| TIMEOUT_REACHED    | 5          | Response / error was not received in specified timeout                           |
