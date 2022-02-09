@@ -1,0 +1,15 @@
+{
+  "index": {
+    "title": "Documentation",
+    "hidden": true
+  },
+  "mdx": {
+    "title": "Markdown guide",
+    "hidden": true
+  },
+  "ui": "Hearth UI",
+  "bridge": "Hearth Bridge",
+  "api": "Hearth API",
+  "accruals-hub": "Accruals hub",
+  "agent-payments": "Payments gateway"
+}
