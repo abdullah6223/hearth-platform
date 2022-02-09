@@ -1,0 +1,7 @@
+{
+  "events": "Navigation events",
+  "push-history-state": "HearthWebAppPushHistoryState",
+  "replace-history-state": "HearthWebAppReplaceHistoryState",
+  "pop-history-state": "HearthWebAppPopHistoryState",
+  "example": "Navigation example"
+}

@@ -1,0 +1,82 @@
+Данный метод не принимает параметров и возвращает текущий контекст пользователя,
+необходимый мини-приложениям для управления сессиями и интерфейсом.
+
+## Платформы
+<SupportedPlatforms platforms={['web', 'B2CNative']} />
+
+## Возвращаемое значение
+
+В случае успешного выполнения вы получите JSON-объект следующего типа:
+<Tabs labels={['Возвращаемый тип', 'Пример возвращаемого значения']}>
+    ```typescript
+    type GetLaunchParamsData = {
+        hearthUserId: string | null                       // ID текущего пользователя
+        hearthUserType: 'staff' | 'resident'              // Тип пользователя
+        hearthContextEntity: 'Organization' | 'Resident'  // Тип контекстной сущности пользователя
+        hearthContextEntityId: string | null              // ID контекстной сущности пользователя
+        hearthDeviceId: string                            // ID устройства
+        hearthLocale: string                              // Текущая локаль пользователя. ("en" / "ru")
+    }
+    ```
+    ```json
+    {
+      "hearthUserId": "8c427089-9392-4a3b-bdf5-db87ba516118",
+      "hearthUserType":"staff",
+      "hearthContextEntity":"Organization",
+      "hearthContextEntityId":"495d6ef0-d8fb-4beb-8760-2a049ddf97fd",
+      "hearthDeviceId":"a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "hearthLocale":"en",
+    }
+    ```
+</Tabs>
+
+## Про тип пользователя и контекстную сущность
+
+С типом пользователя все просто. В B2B приложениях это всегда сотрудник (`staff`), в B2C приложениях - житель (`resident`).
+
+### hearthContextEntity в B2B-приложениях
+
+B2B приложение всегда открывает сотрудник какой-то организации.
+В этом случае вы получите её ID в поле `hearthContextEntityId`, а `hearthContextEntity` будет всегда иметь значение `Organization`.
+При этом пользователь может быть сотрудником нескольких организаций, однако при ее смене в основном интерфейсе приложения происходит перезагрузка IFrame текущего мини-приложения.
+Поэтому вы можете безболезненно повесить обработчик `HearthWebAppGetLaunchParams` на загрузку страницы (`window.addEventListener("load", () => {...}))` в случае чистого JS или `useEffect(() => {...}, [])` в случае React).
+
+<Alert type={'warning'}>
+    Несмотря на то, что IFrame B2B-приложения перезагружается при смене пользователя / организации,
+    в вашем приложении могут остаться куки от старого пользователя, так как политика браузеров не позволяет нам чистить их за вас.
+    Поэтому при загрузке приложения необходимо сравнивать пользователя из HearthWebAppGetLaunchParams с текущим пользователем
+    и в случае несовпадения - производить повторную авторизацию
+</Alert>
+
+### hearthContextEntity в B2C-приложениях
+
+B2C приложение всегда открывает житель. Житель может проживать в нескольких адресах (помещениях), каждому из которых соответствует своя сущность `Resident`, id которой вы можете получить
+при открытии B2C приложения.
+
+## Пример использования
+```typescript jsx
+import '@/styles/globals.css'
+import { cookies } from 'next/headers'
+import React, { useEffect } from 'react'
+
+import bridge from '@open-hearth/bridge'
+
+import type { AppProps } from 'next/app'
+
+export default function App ({ Component, pageProps }: AppProps): React.ReactNode {
+    useEffect(() => {
+        bridge.send('HearthWebAppGetLaunchParams').then(data => {
+            console.log(data.hearthLocale)  // Установите локаль мини-приложения, если у вас имеется таковая
+            if (cookies().get('currentUserId')?.value !== data.hearthUserId) {
+                // Если текущий пользователь в куках не совпадает с пришедшим - ведите пользователя на авторизацию
+            }
+        }).catch((error) => {
+            // В случае ошибки - попытайтесь еще или ведите пользователя на авторизацию
+        })
+    }, [])
+
+    return (
+        <Component {...pageProps} />
+    )
+}
+```

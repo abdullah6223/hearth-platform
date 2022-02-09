@@ -1,0 +1,5 @@
+{
+  "show-modal-window": "HearthWebAppShowModalWindow",
+  "update-modal-window": "HearthWebAppUpdateModalWindow",
+  "close-modal-window": "HearthWebAppCloseModalWindow"
+}
