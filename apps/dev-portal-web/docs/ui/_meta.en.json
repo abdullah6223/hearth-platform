@@ -1,0 +1,9 @@
+{
+  "about": "About Hearth UI",
+  "interactive-sandbox": {
+    "title": "Interactive sandbox",
+    "href": "https://hearth.d.hearth.example.com/ui/index.html"
+  },
+  "icons": "Hearth Icons",
+  "adaptivity": "Adaptive layouts"
+}

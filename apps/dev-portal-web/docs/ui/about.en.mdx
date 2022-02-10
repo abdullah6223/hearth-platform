@@ -1,0 +1,48 @@
+Hearth UI is a library of adaptive React components that allows you to create mini-applications,
+whose interface is similar to the Hearth interface.
+
+## Interactive sandbox
+
+All Hearth UI components can be found in our [interactive sandbox](https://hearth.d.hearth.example.com/ui/index.html),
+where you can see their behaviour, parameters and states (use the `A` key to display the control panel).
+
+## Installation
+
+To install the library, just run the following command according to your package manager:
+<Tabs labels={['npm', 'yarn', 'pnpm']}>
+    ```bash
+    npm i @open-hearth/ui
+    ```
+    ```bash
+    yarn add @open-hearth/ui
+    ```
+    ```bash
+    pnpm i @open-hearth/ui
+    ```
+</Tabs>
+
+You can then add the CSS styles of the Hearth UI to your application to make all Hearth UI components available for you to use:
+```typescript
+import '@open-hearth/ui/dist/styles.min.css'
+```
+
+
+## Using the library
+
+You can import the any required component as follows:
+
+```typescript jsx
+import { Button } from '@open-hearth/ui'
+import type { ButtonProps } from '@open-hearth/ui'
+```
+
+In addition to components, the entire colour palette of Hearth UI is also available in the library. You can get it either in the JS-object format,
+or in the format of CSS variables along with other CSS tokens:
+<Tabs labels={['JS-object', 'CSS-vars']}>
+    ```typescript
+    import { colors } from '@open-hearth/ui/colors'
+    ```
+    ```typescript
+    import '@open-hearth/ui/style-vars/css'
+    ```
+</Tabs>
