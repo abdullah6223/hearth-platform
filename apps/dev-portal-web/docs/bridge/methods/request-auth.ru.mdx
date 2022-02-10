@@ -1,0 +1,85 @@
+Данный метод запускает и **проводит OIDC-авторизацию** для мини-приложения в фоновом режиме. Родительское приложение выполняет цепочку редиректов авторизации в скрытом окне и возвращает результат последнего запроса — статус, тело и URL конечного endpoint'а.
+
+## Платформы
+<SupportedPlatforms platforms={['B2CWeb', 'B2CNative']} />
+
+## Параметры метода
+
+| Имя параметра | Тип параметра | Обязательный | Описание параметра                                                                 |
+|---------------|---------------|--------------|------------------------------------------------------------------------------------|
+| url           | string        | да           | Стартовый URL авторизации на вашем бэкенде, например `https://my-app.com/api/auth/hearth` |
+
+## Возвращаемое значение
+
+В случае успешного выполнения вы получите JSON-объект следующего типа:
+<Tabs labels={['Возвращаемый тип', 'Пример возвращаемого значения']}>
+    ```typescript
+    type RequestAuthData = {
+        response: {
+            status: number  // HTTP-статус последнего ответа
+            body: string    // Тело последнего ответа
+            url: string     // URL последнего endpoint'а в цепочке (например, callback)
+        }
+    }
+    ```
+    ```json
+    {
+      "response": {
+        "status": 200,
+        "body": "",
+        "url": "https://my-app.com/api/auth/hearth/callback"
+      }
+    }
+    ```
+</Tabs>
+
+## Пример использования
+
+```typescript jsx
+// pages/index.tsx
+import React, { useEffect, useState } from 'react'
+
+import bridge from '@open-hearth/bridge'
+
+const AUTH_START_URL = 'https://my-app.com/api/auth/hearth'
+const CALLBACK_URL = 'https://my-app.com/api/auth/hearth/callback'
+
+export default function MiniappPage (): React.ReactNode {
+    const [hearthUserId, setHearthUserId] = useState<string | null>(null)
+
+    // Проверка текущей сессии мини-приложения
+    const { user, refetchUser, authLoading } = useAuth()
+
+    // Получаем hearthUserId из параметров запуска
+    useEffect(() => {
+        bridge.send('HearthWebAppGetLaunchParams').then(({ hearthUserId }) => {
+            setHearthUserId(hearthUserId)
+        }).catch(console.error)
+    }, [])
+
+    // Если сессия отсутствует или принадлежит другому пользователю — авторизуемся
+    useEffect(() => {
+        if (authLoading || !hearthUserId) return
+        if (!user || user.id !== hearthUserId) {
+            bridge.send('HearthWebAppRequestAuth', { url: AUTH_START_URL }).then(({ response }) => {
+                if (response.status === 200 && response.url === CALLBACK_URL) {
+                    // Авторизация прошла успешно — обновляем данные пользователя
+                    refetchUser()
+                }
+            }).catch(console.error)
+        }
+    }, [authLoading, user, hearthUserId, refetchUser])
+
+    return (
+        // ...
+    )
+}
+```
+
+## Безопасность токенов при авторизации
+
+<Alert type={'warning'}>
+    Несмотря на то, что данный метод возвращает URL и тело ответа последнего запроса, **передавать токены авторизации в открытом виде небезопасно**.
+    Авторизация в вашем мини-приложении должна быть построена на `http-only` куках, которые бэкенд мини-приложения устанавливает самостоятельно в процессе OIDC-колбэка.
+    Таким образом, токены никогда не попадают в JavaScript-контекст страниц
+</Alert>

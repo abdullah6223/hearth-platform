@@ -1,0 +1,6 @@
+{
+  "show-notification": "HearthWebAppShowNotification",
+  "show-progress-bar": "HearthWebAppShowProgressBar",
+  "get-active-progress-bars": "HearthWebAppGetActiveProgressBars",
+  "update-progress-bar": "HearthWebAppUpdateProgressBar"
+}
