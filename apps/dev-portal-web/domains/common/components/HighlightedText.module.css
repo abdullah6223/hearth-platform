@@ -1,0 +1,6 @@
+.highlighted-text {
+  padding: 0 2px;
+  color: var(--hearth-global-color-white);
+  background-color: var(--hearth-global-color-green-5);
+  border-radius: var(--hearth-global-border-radius-small);
+}

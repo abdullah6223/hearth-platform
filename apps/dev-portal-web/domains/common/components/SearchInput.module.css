@@ -1,0 +1,9 @@
+.transparent-suffix-input:global(.hearth-input-with-suffix.hearth-input-affix-wrapper) {
+  padding-right: 11px;
+}
+
+.transparent-suffix-input:global(.hearth-input-with-suffix.hearth-input-affix-wrapper>.hearth-input-suffix) {
+  padding: 0;
+  color: var(--hearth-global-color-gray-7);
+  background-color: transparent;
+}

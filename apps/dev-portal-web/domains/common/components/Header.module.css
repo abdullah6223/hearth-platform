@@ -1,0 +1,54 @@
+.logo-container {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 28px;
+  text-decoration: none;
+  column-gap: 10px;
+}
+
+.logo-image-wrapper {
+  width: 28px;
+  height: 28px;
+  transform: translateY(-2px);
+}
+
+.logo-text {
+  color: var(--hearth-global-color-black);
+  font-size: 20px;
+  line-height: 24px;
+}
+
+.logo {
+  object-fit: contain;
+  object-position: left;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  height: 72px;
+  padding: 0 32px;
+  line-height: inherit;
+  background-color: var(--hearth-global-color-white);
+  border-bottom: 1px solid var(--hearth-global-color-gray-3);
+}
+
+.navbar-items-container :global(.hearth-typography-inherit) {
+  color: var(--hearth-global-color-gray-7);
+  cursor: pointer;
+  transition: color var(--hearth-global-transition-duration-default) ease-in-out;
+}
+
+.navbar-items-container :global(.hearth-typography-inherit):hover {
+  color: var(--hearth-global-color-black);
+}

@@ -1,0 +1,45 @@
+.menu-action-icon {
+  cursor: pointer;
+}
+
+.menu-container {
+  position: fixed;
+  top: 72px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--hearth-global-color-white);
+}
+
+.mobile-action-container {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: calc(16px - var(--hearth-global-border-width-default)) 16px 16px;
+  border-top: var(--hearth-global-border-width-default) solid var(--hearth-global-color-gray-3);
+}
+
+.mobile-menu-container {
+  padding: 16px 32px;
+}
+
+.mobile-menu-container :global(.hearth-typography-inherit) {
+  color: var(--hearth-global-color-gray-7);
+  cursor: pointer;
+  transition: color var(--hearth-global-transition-duration-default) ease-in-out;
+}
+
+.mobile-menu-container :global(.hearth-typography-inherit):hover {
+  color: var(--hearth-global-color-black);
+}
+
+.mobile-auth-panel {
+  position: absolute;
+  bottom: 80px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: calc(16px - var(--hearth-global-border-width-default)) 16px 16px;
+}

@@ -1,0 +1,9 @@
+.copyable-input:global(.hearth-input-with-suffix.hearth-input-affix-wrapper) > :global(.hearth-input-suffix) {
+  padding: 8px;
+  color: var(--hearth-global-color-black);
+  background-color: var(--hearth-global-color-white);
+}
+
+.copy-icon {
+  cursor: pointer;
+}
