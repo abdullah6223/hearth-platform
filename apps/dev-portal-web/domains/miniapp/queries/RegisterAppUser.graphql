@@ -1,0 +1,5 @@
+mutation registerAppUserService($data: RegisterAppUserServiceInput!) {
+    hearthUser: registerAppUserService(data: $data) {
+        id
+    }
+}
