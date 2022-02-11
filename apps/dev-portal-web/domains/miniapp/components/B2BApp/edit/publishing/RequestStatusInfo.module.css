@@ -1,0 +1,6 @@
+.checkbox-list {
+  width: 100%;
+  padding: 12px;
+  background: var(--hearth-global-color-white);
+  border-radius: var(--hearth-global-border-radius-medium);
+}
