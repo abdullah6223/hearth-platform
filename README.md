@@ -120,3 +120,104 @@ flowchart LR
 | Testing | Jest 29, ts-jest, k6 | Unit, schema and load tests |
 | Linting | ESLint 8, Stylelint 14, Semgrep, commitlint | Code quality and commit message rules |
 | Deployment | Docker, Docker Compose | Container image and local services |
+
+## How to Run This Project
+
+1. **Prerequisites**
+   - Node.js 24 (`engines.node` is `>=24`)
+   - Yarn 4 (Corepack: `corepack enable`; the repo pins `yarn@4.17.0` in `.yarn/releases`)
+   - Python 3 with `Django` and `psycopg2-binary` (for migrations)
+   - Docker and Docker Compose (for PostgreSQL and Redis), or PostgreSQL 16 and Redis 6 installed locally
+
+2. **Clone**
+   ```bash
+   git clone https://github.com/abdullah6223/hearth-platform.git
+   cd hearth-platform
+   ```
+
+3. **Install dependencies**
+   ```bash
+   yarn install
+   pip install Django psycopg2-binary
+   ```
+   If `turbo: command not found` shows up in later steps, install it globally with `npm i -g turbo@^2`.
+
+4. **Start the databases**
+   ```bash
+   docker compose up -d postgresdb redis
+   ```
+   PostgreSQL listens on `127.0.0.1:5432` (replica on `5433`) and Redis on `127.0.0.1:6379`.
+
+5. **Build the shared packages**
+   ```bash
+   yarn workspace @app/hearth build:deps
+   ```
+
+6. **Environment variables**
+
+   The prepare script copies `.env.example` to `.env` (globally and for each app) and writes the per-app values below. You only need to edit `.env` by hand for optional integrations.
+
+   | Variable | Description | Example |
+   |---|---|---|
+   | `DATABASE_URL` | PostgreSQL connection string for the app | `postgresql://postgres:postgres@127.0.0.1/local-hearth` |
+   | `REDIS_URL` | Redis connection string | `redis://127.0.0.1/1` |
+   | `PORT` | HTTP port of the app | `4001` |
+   | `SERVER_URL` | Public URL of the app | `http://localhost:4001` |
+   | `HEARTH_DOMAIN` | URL of the main app, used by other apps | `http://localhost:4001` |
+   | `DEFAULT_LOCALE` | Default UI language | `en` |
+   | `FILE_FIELD_ADAPTER` | File storage adapter | `local` |
+   | `USE_LOCAL_FEATURE_FLAGS` | Use static feature flags instead of a remote service | `true` |
+   | `DISABLE_CAPTCHA` | Turn off captcha checks locally | `true` |
+   | `NOTIFICATION__SEND_ALL_MESSAGES_TO_CONSOLE` | Print notifications instead of sending them | `true` |
+   | `MESSAGING_CONFIG` | NATS messaging settings (JSON) | see `.env.example` |
+   | `FIREBASE_CONFIG_JSON`, `APPLE_CONFIG_JSON`, `HMS_CONFIG_JSON` | Optional push notification credentials | `<your-credentials>` |
+   | `EMAIL_API_CONFIG` | Optional email provider settings (JSON) | `<your-config>` |
+   | `AI_FLOWS_CONFIG`, `AI_ADAPTERS_CONFIG` | Optional AI flow settings (JSON) | see `.env.example` |
+
+   See `.env.example`, `apps/dev-portal-api/.env.example` and `apps/dev-portal-web/.env.example` for the full list.
+
+7. **Database setup**
+
+   This creates a database for each app, fills in the `.env` files, runs migrations and creates local test users:
+   ```bash
+   node bin/prepare -f hearth
+   ```
+   In a real deployment, set the variables yourself and run migrations with `yarn workspace @app/hearth migrate`.
+
+8. **Run**
+
+   Development mode:
+   ```bash
+   yarn workspace @app/hearth dev
+   ```
+   Production mode:
+   ```bash
+   yarn workspace @app/hearth build
+   yarn workspace @app/hearth start
+   ```
+   Open the `SERVER_URL` printed by the prepare step (its port is stored as `PORT` in `apps/hearth/.env`, e.g. `http://localhost:4001`).
+
+   Background worker, in a second terminal:
+   ```bash
+   yarn workspace @app/hearth worker
+   ```
+
+9. **Run tests**
+
+   Tests run against a prepared local environment with the databases running:
+   ```bash
+   yarn workspace @app/hearth test
+   ```
+   Lint the whole repository with `yarn lint`.
+
+10. **Docker**
+
+    Start the full database set (PostgreSQL primary and replica, Redis) and build the app image:
+    ```bash
+    docker compose --profile dbs up -d
+    docker compose --profile app build app
+    ```
+
+## License
+
+MIT, see [LICENSE](./LICENSE).
