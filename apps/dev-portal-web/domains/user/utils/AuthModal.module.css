@@ -1,0 +1,9 @@
+:global(.hearth-modal-root) :global(.hearth-modal).hearth-auth-modal :global(.hearth-modal-body) {
+  padding-top: 0;
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  row-gap: 24px;
+}
