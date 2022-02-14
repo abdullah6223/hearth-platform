@@ -39,7 +39,7 @@ flowchart LR
     R --> W[Worker<br/>worker.js]
     W --> DB
     W --> X[Email / SMS / push<br/>bank & billing integrations]
-    M[Mini-apps] -->|@open-hearth/bridge| N
+    M[Mini-apps] -->|"@open-hearth/bridge"| N
     M -->|OIDC + GraphQL| K
 ```
 
